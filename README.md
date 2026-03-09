@@ -16,7 +16,7 @@ A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an O
            ▼             ▼             ▼
      ChromaDB        ChromaDB      OpenAI-compatible
    (chroma_news)  (chroma_filings)   LLM API
-   5 news docs     2 filing docs   gpt-4o-mini (local)
+   5 news docs     2 filing docs   gpt-5.3-chat-latest (local)
                                    LLaMA (HPC)
 ```
 
@@ -76,7 +76,7 @@ cp .env.example .env.local
 | Variable | Default | Purpose |
 |---|---|---|
 | `LMDEPLOY_BASE_URL` | `https://api.openai.com/v1` | LLM API endpoint |
-| `LMDEPLOY_MODEL` | `gpt-4o-mini` | Model name |
+| `LMDEPLOY_MODEL` | `gpt-5.3-chat-latest` | Model name |
 | `LMDEPLOY_API_KEY` | *(empty)* | API key — required for LLM calls |
 | `HF_HOME` | `DATA/hf_home` | HuggingFace model cache |
 | `TOKENIZERS_PARALLELISM` | `false` | Suppress tokenizer warnings |
@@ -91,6 +91,19 @@ ollama pull llama3.2:3b
 # LMDEPLOY_MODEL=llama3.2:3b
 # LMDEPLOY_API_KEY=ollama
 ```
+
+### OpenAI SDK compatibility
+
+The project uses `openai==2.26.0`. Two parameters changed for newer frontier models
+(GPT-5 class and above) compared to GPT-4:
+
+| Parameter | Old (GPT-4) | New (GPT-5+) |
+|---|---|---|
+| Token limit | `max_tokens` | `max_completion_tokens` |
+| Sampling | `temperature=0.2` | not supported — omit entirely |
+
+`core/lmdeploy_client.py` already uses `max_completion_tokens` and omits `temperature`.
+The HPC LLaMA deployment via LMDeploy is unaffected — it ignores unknown parameters.
 
 ### 4. Bootstrap the filings vector DB
 
