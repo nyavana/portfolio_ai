@@ -1,0 +1,23 @@
+[
+  {
+    "id": "news_001",
+    "date": "2026-03-08",
+    "title": "Apple faces slowing iPhone demand in key markets",
+    "text": "Analysts noted weaker demand trends for iPhone sales in several international markets, which may pressure near-term revenue growth.",
+    "tickers": ["AAPL"]
+  },
+  {
+    "id": "news_002",
+    "date": "2026-03-08",
+    "title": "NVIDIA expands AI chip partnerships with major cloud providers",
+    "text": "NVIDIA announced expanded AI infrastructure partnerships, which could support future data center revenue growth.",
+    "tickers": ["NVDA"]
+  },
+  {
+    "id": "news_003",
+    "date": "2026-03-07",
+    "title": "Banks may face tighter capital requirements",
+    "text": "Regulators are discussing possible higher capital requirements for large banks, which could weigh on profitability.",
+    "tickers": ["JPM"]
+  }
+]

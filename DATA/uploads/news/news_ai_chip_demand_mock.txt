@@ -1,0 +1,4 @@
+Recent market news suggests that demand for AI chips remains robust as enterprises accelerate model training and inference deployment.
+NVIDIA and other semiconductor firms benefited from optimistic spending expectations tied to data center expansion.
+However, analysts cautioned that stretched valuations may amplify downside risk if revenue growth slows or supply bottlenecks persist.
+Portfolio managers are also monitoring whether rising infrastructure costs could weigh on margins across the broader AI supply chain.

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+openai
+chromadb
+sentence-transformers
+datasets

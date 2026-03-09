@@ -1,0 +1,5 @@
+NVIDIA reported strong demand for data center GPUs, with growth supported by large enterprise and hyperscaler AI spending.
+Management stated that near-term revenue visibility remains strong, but supply constraints and customer concentration remain notable concerns.
+The company expects continued capital intensity across the AI ecosystem and acknowledged that valuation expectations are elevated.
+Risk factors include semiconductor supply disruption, export restrictions, competition from alternative accelerators, and cyclical volatility in technology spending.
+Management also noted that any delay in customer deployment schedules could affect short-term revenue timing.
