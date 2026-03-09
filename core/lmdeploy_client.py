@@ -1,14 +1,10 @@
 from __future__ import annotations
 
-import os
 from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
-
-DEFAULT_BASE_URL = "http://127.0.0.1:23333/v1"
-DEFAULT_API_KEY = "lmdeploy"
-DEFAULT_MODEL = "/burg-archive/stats/users/kj2712/6895/LLaMA-Factory/saves/llama"
+from app.config import LMDEPLOY_BASE_URL, LMDEPLOY_API_KEY, LMDEPLOY_MODEL
 
 
 class LMDeployClient:
@@ -18,9 +14,9 @@ class LMDeployClient:
         api_key: Optional[str] = None,
         model: Optional[str] = None,
     ) -> None:
-        self.base_url = (base_url or os.getenv("LMDEPLOY_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
-        self.api_key = api_key or os.getenv("LMDEPLOY_API_KEY") or DEFAULT_API_KEY
-        self.model = model or os.getenv("LMDEPLOY_MODEL") or DEFAULT_MODEL
+        self.base_url = (base_url or LMDEPLOY_BASE_URL).rstrip("/")
+        self.api_key = api_key or LMDEPLOY_API_KEY
+        self.model = model or LMDEPLOY_MODEL
 
         self.client = OpenAI(
             base_url=self.base_url,

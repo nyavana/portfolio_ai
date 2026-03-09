@@ -19,16 +19,22 @@
 
 ### 开发环境 Base URL
 
-本地通过 SSH 转发测试时：
+本地开发（`bash run_api.sh`）：
 
 ```text
-http://127.0.0.1:18000
+http://127.0.0.1:8000
+```
+
+HPC 部署通过 SSH 转发时（`sbatch api_server.sbatch` + `ssh -L 8000:localhost:8000 <hpc>`）：
+
+```text
+http://127.0.0.1:8000
 ```
 
 > 前端建议把它配置成环境变量，例如：
 
 ```ts
-const API_BASE_URL = "http://127.0.0.1:18000";
+const API_BASE_URL = "http://127.0.0.1:8000";
 ```
 
 ### 文档页
@@ -148,10 +154,13 @@ GET /health
 ```json
 {
   "status": "ok",
-  "lmdeploy_base_url": "http://127.0.0.1:23333/v1",
-  "lmdeploy_model": "/burg-archive/stats/users/kj2712/6895/LLaMA-Factory/saves/llama"
+  "lmdeploy_base_url": "https://api.openai.com/v1",
+  "lmdeploy_model": "gpt-4o-mini"
 }
 ```
+
+> **注意：** `lmdeploy_base_url` 和 `lmdeploy_model` 的值由服务端环境变量决定。
+> 本地开发时为 OpenAI API，HPC 部署时为 LMDeploy + LLaMA。
 
 ### 前端建议
 - 在页面顶部显示“服务正常 / 异常”
@@ -512,7 +521,7 @@ multipart/form-data
 ### cURL 示例
 
 ```bash
-curl -X POST "http://127.0.0.1:18000/upload/filing" \
+curl -X POST "http://127.0.0.1:8000/upload/filing" \
   -F "file=@/path/to/filing_apple_q_mock.txt"
 ```
 
@@ -521,11 +530,14 @@ curl -X POST "http://127.0.0.1:18000/upload/filing" \
 ```json
 {
   "status": "ok",
-  "saved_to": "/burg-archive/stats/users/kj2712/6895/portfolio_ai/DATA/uploads/filings/filing_apple_q_mock.txt",
+  "saved_to": "/path/to/portfolio_ai/DATA/uploads/filings/filing_apple_q_mock.txt",
   "index_result": {
-    "indexed": true,
-    "chunks": 4,
-    "collection": "filings"
+    "status": "ok",
+    "file": "DATA/uploads/filings/filing_apple_q_mock.txt",
+    "source_file": "filing_apple_q_mock.txt",
+    "chunks_indexed": 1,
+    "rows_parsed": 1,
+    "collection": "financial_reports"
   }
 }
 ```
@@ -567,7 +579,7 @@ multipart/form-data
 ### cURL 示例
 
 ```bash
-curl -X POST "http://127.0.0.1:18000/upload/news" \
+curl -X POST "http://127.0.0.1:8000/upload/news" \
   -F "file=@/path/to/news_ai_chip_demand_mock.txt"
 ```
 
@@ -576,10 +588,13 @@ curl -X POST "http://127.0.0.1:18000/upload/news" \
 ```json
 {
   "status": "ok",
-  "saved_to": "/burg-archive/stats/users/kj2712/6895/portfolio_ai/DATA/uploads/news/news_ai_chip_demand_mock.txt",
+  "saved_to": "/path/to/portfolio_ai/DATA/uploads/news/news_ai_chip_demand_mock.txt",
   "index_result": {
-    "indexed": true,
-    "chunks": 3,
+    "status": "ok",
+    "file": "DATA/uploads/news/news_ai_chip_demand_mock.txt",
+    "source_file": "news_ai_chip_demand_mock.txt",
+    "chunks_indexed": 1,
+    "rows_parsed": 1,
     "collection": "news"
   }
 }
@@ -636,7 +651,7 @@ curl -X POST "http://127.0.0.1:18000/upload/news" \
 ### 示例封装
 
 ```ts
-const API_BASE_URL = "http://127.0.0.1:18000";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 export async function getPortfolioSummary() {
   const res = await fetch(`${API_BASE_URL}/portfolio_summary`);
