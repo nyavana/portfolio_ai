@@ -2,6 +2,7 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+export PROJECT_DIR="$SCRIPT_DIR"
 
 # Load local env vars
 if [ -f "$SCRIPT_DIR/.env.local" ]; then
