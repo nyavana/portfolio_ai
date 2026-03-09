@@ -36,8 +36,7 @@ class LMDeployClient:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=temperature,
-            max_tokens=max_tokens,
+            max_completion_tokens=max_tokens,
         )
         return resp.choices[0].message.content or ""
 
@@ -50,7 +49,6 @@ class LMDeployClient:
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
+            max_completion_tokens=max_tokens,
         )
         return resp.choices[0].message.content or ""
