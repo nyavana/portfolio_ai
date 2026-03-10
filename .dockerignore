@@ -24,7 +24,6 @@ npm-debug.log
 yarn-error.log
 
 # App specific
-DATA
 data/*.db
 UPLOAD_*
 

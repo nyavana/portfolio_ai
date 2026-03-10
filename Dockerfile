@@ -32,6 +32,7 @@ COPY ingest/ ingest/
 COPY rag/ rag/
 COPY scripts/ scripts/
 COPY services/ services/
+COPY DATA/ DATA/
 COPY .env.example .env.local
 
 # Copy built frontend assets
