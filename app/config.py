@@ -26,8 +26,8 @@ NEWS_COLLECTION = "news"
 EMBED_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 # ===== LMDeploy / LLM =====
-LMDEPLOY_BASE_URL = os.getenv("LMDEPLOY_BASE_URL", "http://127.0.0.1:23333/v1")
-LMDEPLOY_MODEL = os.getenv("LMDEPLOY_MODEL", "gpt-4o-mini")
+LMDEPLOY_BASE_URL = os.getenv("LMDEPLOY_BASE_URL", "https://api.openai.com/v1/")
+LMDEPLOY_MODEL = os.getenv("LMDEPLOY_MODEL", "gpt-5.3-chat-latest")
 LMDEPLOY_API_KEY = os.getenv("LMDEPLOY_API_KEY", "")
 
 # ===== Ingestion =====
