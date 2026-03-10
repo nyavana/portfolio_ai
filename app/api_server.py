@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import ensure_directories, UPLOAD_FILINGS_DIR, UPLOAD_NEWS_DIR
 from app.schemas import QuestionRequest
@@ -23,6 +24,14 @@ from services.risk_flags import detect_risk_flags
 
 
 app = FastAPI(title="Portfolio AI Assistant")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 ensure_directories()
 llm = LMDeployClient()
 

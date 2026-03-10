@@ -1,16 +1,21 @@
 # Portfolio AI Assistant
 
-A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an OpenAI-compatible LLM.
+A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an OpenAI-compatible LLM — with a React frontend ("Dark Terminal Editorial" design).
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   FastAPI (port 8000)                │
-│  GET /portfolio_summary  GET /risk_flags             │
-│  GET /news_impact        POST /ask                   │
-│  POST /upload/filing     POST /upload/news           │
-└────────────────────────┬────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│           React Frontend (Vite, port 5173)           │
+│  Dashboard · Risk Flags · News · Chat · Upload · Status │
+└────────────────────────┬─────────────────────────────┘
+                         │ fetch (CORS enabled)
+┌────────────────────────▼─────────────────────────────┐
+│                   FastAPI (port 8000)                 │
+│  GET /portfolio_summary  GET /risk_flags              │
+│  GET /news_impact        POST /ask                    │
+│  POST /upload/filing     POST /upload/news            │
+└────────────────────────┬─────────────────────────────┘
                          │
            ┌─────────────┼─────────────┐
            ▼             ▼             ▼
@@ -20,11 +25,11 @@ A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an O
                                    LLaMA (HPC)
 ```
 
-**Key modules:**
+**Key backend modules:**
 
 | Path | Purpose |
 |---|---|
-| `app/api_server.py` | FastAPI routes |
+| `app/api_server.py` | FastAPI routes + CORS middleware |
 | `app/config.py` | Env-var driven config (no hard-coded paths) |
 | `core/lmdeploy_client.py` | OpenAI-compatible LLM client |
 | `core/router.py` | Query intent classification |
@@ -34,6 +39,17 @@ A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an O
 | `ingest/` | Chunking and indexing pipeline |
 | `data/` | Data loading utilities |
 
+**Frontend (`frontend/`):**
+
+| Path | Purpose |
+|---|---|
+| `frontend/src/api/` | Typed fetch wrappers for all 7 endpoints |
+| `frontend/src/pages/` | Dashboard, RiskFlags, NewsImpact, Chat, Upload, Status |
+| `frontend/src/components/` | Layout shell, AiCard, charts, common UI |
+| `frontend/src/hooks/` | `useApi` (generic GET), `useChatHistory` (local chat state) |
+| `frontend/src/styles/` | CSS design tokens, animations, global reset |
+| `frontend/src/types/api.ts` | TypeScript interfaces mirroring backend contracts |
+
 ---
 
 ## Local Development Setup
@@ -41,7 +57,21 @@ A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an O
 ### Prerequisites
 
 - Python 3.12 (`/usr/bin/python3.12`)
+- Node.js 18+ (tested on v25.8)
 - An OpenAI API key **or** a local Ollama server
+
+### 0. Frontend quick start
+
+```bash
+cd frontend
+npm install
+npm run dev   # → http://localhost:5173
+```
+
+Requires the backend to be running on port 8000 (see steps 1–5 below).
+The API URL can be overridden with `VITE_API_BASE_URL` in `frontend/.env.local`.
+
+---
 
 ### 1. Create the virtual environment
 
@@ -208,6 +238,8 @@ is incompatible with the chromadb 1.x rewrite.
 ## API Reference
 
 See `portfolio_ai_frontend_mock_api.md` for full request/response schemas and TypeScript types.
+
+**CORS:** The backend allows cross-origin requests from `http://localhost:5173` and `http://127.0.0.1:5173` (configured in `app/api_server.py` via `CORSMiddleware`). Extend `allow_origins` when deploying to a different frontend host.
 
 **Quick reference:**
 

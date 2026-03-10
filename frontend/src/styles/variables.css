@@ -1,0 +1,74 @@
+/* ═══════════════════════════════════════════════
+   Portfolio AI — Design Tokens
+   "Dark Terminal Editorial" theme
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* ── Backgrounds ── */
+  --bg-primary:     #0B0E11;
+  --bg-surface:     #141820;
+  --bg-elevated:    #1C2230;
+  --bg-hover:       #232a3a;
+  --bg-input:       #0F1318;
+
+  /* ── Borders ── */
+  --border:         #2A3040;
+  --border-subtle:  #1E2535;
+
+  /* ── Text ── */
+  --text-primary:   #E8ECF1;
+  --text-secondary: #8892A4;
+  --text-tertiary:  #5A6478;
+  --text-inverse:   #0B0E11;
+
+  /* ── Accents ── */
+  --accent-green:   #34D399;
+  --accent-green-dim: rgba(52, 211, 153, 0.12);
+  --accent-amber:   #FBBF24;
+  --accent-amber-dim: rgba(251, 191, 36, 0.12);
+  --accent-red:     #F87171;
+  --accent-red-dim: rgba(248, 113, 113, 0.12);
+  --accent-blue:    #60A5FA;
+  --accent-blue-dim: rgba(96, 165, 250, 0.12);
+  --accent-cyan:    #22D3EE;
+  --accent-cyan-dim: rgba(34, 211, 238, 0.10);
+
+  /* ── Gradients ── */
+  --gradient-ai:    linear-gradient(135deg, #60A5FA 0%, #22D3EE 100%);
+  --gradient-shimmer: linear-gradient(90deg, transparent 0%, rgba(96,165,250,0.06) 50%, transparent 100%);
+
+  /* ── Typography ── */
+  --font-display:   'DM Serif Display', Georgia, serif;
+  --font-body:      'Source Sans 3', 'Source Sans Pro', sans-serif;
+  --font-mono:      'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Spacing ── */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* ── Radii ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px var(--border-subtle);
+  --shadow-elevated: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+
+  /* ── Layout ── */
+  --sidebar-collapsed: 60px;
+  --sidebar-expanded: 220px;
+  --topbar-height: 52px;
+  --content-max: 1400px;
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+}

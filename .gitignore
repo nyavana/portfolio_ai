@@ -1,7 +1,32 @@
+# ── Python ──────────────────────────────────────
 .venv/
-.env.local
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# ── Environment ──────────────────────────────────
+.env.local
+.env.*.local
+
+# ── Runtime data — ChromaDB vector stores ────────
+# These binary files are modified on every index/query operation.
+DATA/chroma_filings/
+DATA/chroma_news/
+
+# ── HuggingFace model cache ───────────────────────
+# Downloaded on first run (~22 MB for all-MiniLM-L6-v2).
+DATA/hf_home/
+
+# ── Frontend ─────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+
+# ── Test artifacts ────────────────────────────────
+frontend/test-screenshots/
+
+# ── OS ───────────────────────────────────────────
 .DS_Store
+Thumbs.db
