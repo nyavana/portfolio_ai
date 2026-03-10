@@ -30,5 +30,6 @@ frontend/test-screenshots/
 # ── OS ───────────────────────────────────────────
 .DS_Store
 Thumbs.db
-
-CLAUDE.md
+AGENTS.md
+GEMINI.md
+.sisyphus/drafts/vercel-deployment.md

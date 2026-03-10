@@ -36,7 +36,7 @@ ensure_directories()
 llm = LMDeployClient()
 
 
-@app.get("/")
+@app.get("/api/status")
 def root():
     return {
         "status": "ok",
@@ -203,3 +203,18 @@ def ask(req: QuestionRequest):
     result = answer_financial_question(req.question)
     result["route"] = route
     return result
+
+# --- Container Frontend Serving ---
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = Path("frontend/dist")
+if frontend_dist.exists():
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        path = frontend_dist / full_path
+        if path.exists() and path.is_file():
+            return FileResponse(path)
+        return FileResponse(frontend_dist / "index.html")

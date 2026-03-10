@@ -1,0 +1,38 @@
+# Source control
+.git
+.gitignore
+
+# Env vars
+.env*
+!.env.example
+
+# Python
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+htmlcov
+.coverage
+.tox
+noxfile.py
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# App specific
+DATA
+data/*.db
+UPLOAD_*
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+.claude
+.gemini
+.sisyphus
