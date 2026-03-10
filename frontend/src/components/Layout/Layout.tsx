@@ -7,6 +7,8 @@ import { getHealth } from '../../api/system';
 import { getStoredLlmConfig } from '../../api/llmSession';
 import styles from './Layout.module.css';
 
+export const LLM_CONFIG_UPDATED_EVENT = 'llm-config-updated';
+
 const PAGE_TITLES: Record<string, string> = {
   '/':       'Portfolio Summary',
   '/risk':   'Risk Flags',
@@ -43,6 +45,7 @@ export function Layout() {
     if (stored?.api_key) {
       setForceSettings(false);
       setSettingsOpen(false);
+      window.dispatchEvent(new CustomEvent(LLM_CONFIG_UPDATED_EVENT));
     }
   }, []);
 

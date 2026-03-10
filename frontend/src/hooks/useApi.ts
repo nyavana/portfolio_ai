@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { RequestState } from '../types/api';
+import { LLM_CONFIG_UPDATED_EVENT } from '../components/Layout/Layout';
 
 /**
  * Generic hook for GET-style API calls.
@@ -27,6 +28,12 @@ export function useApi<T>(fetcher: () => Promise<T>): RequestState<T> & { refetc
 
   useEffect(() => {
     refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    const handler = () => refetch();
+    window.addEventListener(LLM_CONFIG_UPDATED_EVENT, handler);
+    return () => window.removeEventListener(LLM_CONFIG_UPDATED_EVENT, handler);
   }, [refetch]);
 
   return { ...state, refetch };
