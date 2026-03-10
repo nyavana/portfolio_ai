@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useChatHistory } from '../hooks/useChatHistory';
 import { ErrorBanner } from '../components/common/ErrorBanner';
+import { MarkdownRenderer } from '../components/common/MarkdownRenderer';
 import styles from './Pages.module.css';
 import commonStyles from '../components/common/Common.module.css';
 
@@ -54,7 +55,11 @@ export function Chat() {
                 {msg.route}
               </span>
             )}
-            <p className={styles.chatText}>{msg.content}</p>
+            {msg.role === 'user' ? (
+              <p className={styles.chatText}>{msg.content}</p>
+            ) : (
+              <MarkdownRenderer>{msg.content}</MarkdownRenderer>
+            )}
             {msg.role === 'assistant' && msg.data != null && (
               <details className={styles.chatDetails}>
                 <summary className="text-secondary">View data</summary>

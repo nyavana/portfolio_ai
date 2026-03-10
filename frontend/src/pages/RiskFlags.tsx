@@ -1,6 +1,7 @@
 import { useApi } from '../hooks/useApi';
 import { getRiskFlags } from '../api/risk';
 import { AiCard } from '../components/common/AiCard';
+import { MarkdownRenderer } from '../components/common/MarkdownRenderer';
 import { SeverityBadge } from '../components/common/SeverityBadge';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
@@ -61,7 +62,7 @@ export function RiskFlags() {
 
       {/* AI Risk Summary */}
       <AiCard className="animate-in stagger-4">
-        <p className={styles.aiText}>{llm_risk_summary}</p>
+        <MarkdownRenderer>{llm_risk_summary}</MarkdownRenderer>
       </AiCard>
     </div>
   );

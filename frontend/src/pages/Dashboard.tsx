@@ -1,6 +1,7 @@
 import { useApi } from '../hooks/useApi';
 import { getPortfolioSummary } from '../api/portfolio';
 import { AiCard } from '../components/common/AiCard';
+import { MarkdownRenderer } from '../components/common/MarkdownRenderer';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import { DonutChart } from '../components/charts/DonutChart';
@@ -129,7 +130,7 @@ export function Dashboard() {
       {/* ── Right: AI Summary ── */}
       <div className={styles.aiColumn}>
         <AiCard className="animate-in stagger-2">
-          <p className={styles.aiText}>{llm_summary}</p>
+          <MarkdownRenderer>{llm_summary}</MarkdownRenderer>
         </AiCard>
       </div>
     </div>

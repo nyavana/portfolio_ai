@@ -53,6 +53,11 @@ def _normalize_retrieve_output(result: Any) -> List[Dict[str, Any]]:
     """
     normalized: List[Dict[str, Any]] = []
 
+    # 情况 0：返回 (docs, metas, ids) — strip ids, normalise as 2-tuple
+    if isinstance(result, tuple) and len(result) == 3:
+        docs, metas, _ids = result
+        result = (docs, metas)
+
     # 情况 1：返回 (docs, metas)
     if isinstance(result, tuple) and len(result) == 2:
         docs, metas = result

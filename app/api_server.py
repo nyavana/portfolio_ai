@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import ensure_directories, UPLOAD_FILINGS_DIR, UPLOAD_NEWS_DIR
 from app.schemas import QuestionRequest, LlmConfigResponse
@@ -34,6 +35,12 @@ app.add_middleware(
 
 ensure_directories()
 llm = LMDeployClient()
+
+
+@app.exception_handler(ValueError)
+@app.exception_handler(RuntimeError)
+async def llm_error_handler(request: Request, exc: Exception) -> JSONResponse:
+    return JSONResponse(status_code=500, content={"error": str(exc)})
 
 
 def _get_llm_from_request(request: Request) -> LMDeployClient:

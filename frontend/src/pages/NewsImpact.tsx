@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApi } from '../hooks/useApi';
 import { getNewsImpact } from '../api/news';
 import { AiCard } from '../components/common/AiCard';
+import { MarkdownRenderer } from '../components/common/MarkdownRenderer';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import styles from './Pages.module.css';
@@ -83,7 +84,7 @@ export function NewsImpact() {
       {/* Right — AI Summary (sticky) */}
       <div className={styles.stickyColumn}>
         <AiCard className="animate-in stagger-2">
-          <p className={styles.aiText}>{llm_news_summary}</p>
+          <MarkdownRenderer>{llm_news_summary}</MarkdownRenderer>
         </AiCard>
       </div>
     </div>

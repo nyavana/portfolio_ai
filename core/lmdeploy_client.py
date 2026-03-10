@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
+import openai
 from openai import OpenAI
 
 from app.config import LMDEPLOY_BASE_URL, LMDEPLOY_API_KEY, LMDEPLOY_MODEL
@@ -30,15 +31,22 @@ class LMDeployClient:
         temperature: float = 0.2,
         max_tokens: int = 1024,
     ) -> str:
-        resp = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            max_completion_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content or ""
+        try:
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_completion_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content or ""
+        except openai.AuthenticationError as e:
+            raise ValueError("LLM API key not configured or invalid") from e
+        except (openai.APIConnectionError, openai.APIStatusError) as e:
+            raise RuntimeError(str(e)) from e
+        except IndexError:
+            raise RuntimeError("LLM returned empty response")
 
     def chat_with_messages(
         self,
@@ -46,9 +54,16 @@ class LMDeployClient:
         temperature: float = 0.2,
         max_tokens: int = 1024,
     ) -> str:
-        resp = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            max_completion_tokens=max_tokens,
-        )
-        return resp.choices[0].message.content or ""
+        try:
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_completion_tokens=max_tokens,
+            )
+            return resp.choices[0].message.content or ""
+        except openai.AuthenticationError as e:
+            raise ValueError("LLM API key not configured or invalid") from e
+        except (openai.APIConnectionError, openai.APIStatusError) as e:
+            raise RuntimeError(str(e)) from e
+        except IndexError:
+            raise RuntimeError("LLM returned empty response")
