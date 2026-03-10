@@ -205,7 +205,7 @@ def ask(req: QuestionRequest, request: Request):
         )
         return {"route": route, "answer": answer, "data": news}
 
-    result = answer_financial_question(req.question)
+    result = answer_financial_question(req.question, llm_client=req_llm)
     result["route"] = route
     return result
 

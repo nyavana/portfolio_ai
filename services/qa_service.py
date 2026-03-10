@@ -1,3 +1,5 @@
+from typing import Optional
+
 from core.lmdeploy_client import LMDeployClient
 from rag.filings_retriever import FilingsRetriever
 from rag.news_retriever import NewsRetriever
@@ -38,9 +40,12 @@ def _build_context_block(items: list[str], title: str) -> str:
     return f"{title}:\n{joined}"
 
 
-def answer_financial_question(question: str) -> dict:
+def answer_financial_question(
+    question: str,
+    llm_client: Optional[LMDeployClient] = None,
+) -> dict:
     route = _classify_question(question)
-    llm = LMDeployClient()
+    llm = llm_client or LMDeployClient()
 
     filings_docs, filings_metas, filings_ids = [], [], []
     news_docs, news_metas, news_ids = [], [], []
