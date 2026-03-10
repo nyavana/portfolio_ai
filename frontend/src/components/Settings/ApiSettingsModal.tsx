@@ -90,7 +90,7 @@ export function ApiSettingsModal({ isOpen, forceOpen, onClose, onSaved }: ApiSet
             <input
               className={styles.input}
               type="text"
-              placeholder="http://127.0.0.1:11434/v1"
+              placeholder="https://api.openai.com/v1/"
               value={form.baseUrl}
               onChange={(e) => setForm((prev) => ({ ...prev, baseUrl: e.target.value }))}
             />
@@ -101,7 +101,7 @@ export function ApiSettingsModal({ isOpen, forceOpen, onClose, onSaved }: ApiSet
             <input
               className={styles.input}
               type="text"
-              placeholder="e.g. gpt-4o or llama3"
+              placeholder="e.g. gpt-5.3-chat-latest"
               value={form.model}
               onChange={(e) => setForm((prev) => ({ ...prev, model: e.target.value }))}
             />
