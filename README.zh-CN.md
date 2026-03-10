@@ -78,8 +78,8 @@ API URL 可通过 `frontend/.env.local` 中的 `VITE_API_BASE_URL` 覆盖。
 ### 1. 创建虚拟环境
 
 ```bash
-# python3.12-venv may not include ensurepip on Debian/Ubuntu;
-# bootstrap pip manually if needed
+# 在 Debian/Ubuntu 上，python3.12-venv 可能不包含 ensurepip
+# 如有需要，请手动引导安装 pip
 python3.12 -m venv --without-pip .venv
 curl -sS https://bootstrap.pypa.io/get-pip.py | .venv/bin/python3.12
 ```
@@ -100,7 +100,7 @@ python3.12 -m venv .venv
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local — fill in LMDEPLOY_API_KEY
+# 编辑 .env.local，填入 LMDEPLOY_API_KEY
 ```
 
 `.env.local` 控制以下配置：
@@ -118,7 +118,7 @@ cp .env.example .env.local
 
 ```bash
 ollama pull llama3.2:3b
-# In .env.local:
+# 在 .env.local 中：
 # LMDEPLOY_BASE_URL=http://127.0.0.1:11434/v1
 # LMDEPLOY_MODEL=llama3.2:3b
 # LMDEPLOY_API_KEY=ollama
@@ -159,17 +159,17 @@ bash run_api.sh
 ### 冒烟测试
 
 ```bash
-# Health check
+# 健康检查
 curl -s http://127.0.0.1:8000/health | python3 -m json.tool
 
-# Full LLM round-trip — pass key as a request header (overrides env var)
+# 完整 LLM 往返测试：通过请求头传入 key（会覆盖环境变量）
 curl -s -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: sk-...your-key..." \
   -d '{"question": "What are the risk factors in the Apple filing?"}' \
   | python3 -m json.tool
 
-# Alternatively, set LMDEPLOY_API_KEY in .env.local and omit the header
+# 或者在 .env.local 中设置 LMDEPLOY_API_KEY，并省略该请求头
 ```
 
 ---
@@ -179,20 +179,20 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 ```
 DATA/
 ├── portfolio/
-│   └── demo_portfolio.json        # 3 holdings: AAPL, NVDA, JPM + $12k cash
+│   └── demo_portfolio.json        # 3 个持仓：AAPL、NVDA、JPM + 12k 美元现金
 ├── news/
-│   └── demo_news.json             # 3 news items for AAPL, NVDA, JPM
+│   └── demo_news.json             # 3 条 AAPL、NVDA、JPM 相关新闻
 ├── filings/
-│   └── financial_reports_sec_small_lite/   # HuggingFace dataset (optional)
+│   └── financial_reports_sec_small_lite/   # HuggingFace 数据集（可选）
 ├── uploads/
-│   ├── filings/                   # Filing .txt files uploaded via API
-│   └── news/                      # News .txt files uploaded via API
+│   ├── filings/                   # 通过 API 上传的 filing .txt 文件
+│   └── news/                      # 通过 API 上传的 news .txt 文件
 ├── processed/
 │   ├── filings/
 │   └── news/
-├── chroma_news/                   # ChromaDB: 5 docs (pre-populated)
-├── chroma_filings/                # ChromaDB: 2 docs (bootstrapped)
-└── hf_home/                       # HuggingFace model cache
+├── chroma_news/                   # ChromaDB：5 个文档（预填充）
+├── chroma_filings/                # ChromaDB：2 个文档（已初始化）
+└── hf_home/                       # HuggingFace 模型缓存
 ```
 
 ---
@@ -261,6 +261,31 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
+### 从 Docker Hub 拉取镜像
+
+通过 GitHub Actions，每次推送到 `main` 时都会自动发布预构建镜像。这样在远程服务器上无需克隆仓库，也无需本地构建：
+
+```bash
+docker pull nyavana/portfolio-ai:latest
+
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-...your-key... \
+  -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
+  -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
+  nyavana/portfolio-ai:latest
+```
+
+如需持久化数据卷：
+
+```bash
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-... \
+  -v $(pwd)/DATA:/app/DATA \
+  nyavana/portfolio-ai:latest
+```
+
+每次推送到 `main` 还会基于 Git commit SHA 生成一个固定标签（例如 `nyavana/portfolio-ai:abc1234`），便于可复现部署。
+
 ---
 
 ## HPC 部署（SLURM）
@@ -298,7 +323,7 @@ import chromadb
 from chromadb.api.configuration import CollectionConfigurationInternal
 
 cfg = CollectionConfigurationInternal().to_json_str()
-# Then: UPDATE collections SET config_json_str = '<cfg>' WHERE name = 'news';
+# 然后执行：UPDATE collections SET config_json_str = '<cfg>' WHERE name = 'news';
 ```
 
 **版本固定为 `chromadb==0.6.3`**，因为现有 SQLite schema（migration level 10）
