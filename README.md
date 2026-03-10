@@ -7,17 +7,17 @@ A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an O
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────┐
-│           React Frontend (Vite, port 5173)           │
+┌─────────────────────────────────────────────────────────┐
+│           React Frontend (Vite, port 5173)              │
 │  Dashboard · Risk Flags · News · Chat · Upload · Status │
-└────────────────────────┬─────────────────────────────┘
+└────────────────────────┬────────────────────────────────┘
                          │ fetch (CORS enabled)
-┌────────────────────────▼─────────────────────────────┐
-│                   FastAPI (port 8000)                 │
-│  GET /portfolio_summary  GET /risk_flags              │
-│  GET /news_impact        POST /ask                    │
-│  POST /upload/filing     POST /upload/news            │
-└────────────────────────┬─────────────────────────────┘
+┌────────────────────────▼────────────────────────────────┐
+│                   FastAPI (port 8000)                   │
+│  GET /portfolio_summary  GET /risk_flags                │
+│  GET /news_impact        POST /ask                      │
+│  POST /upload/filing     POST /upload/news              │
+└────────────────────────┬────────────────────────────────┘
                          │
            ┌─────────────┼─────────────┐
            ▼             ▼             ▼
