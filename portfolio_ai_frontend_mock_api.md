@@ -58,6 +58,11 @@ GET /openapi.json
 - `GET /`
 - `GET /health`
 
+### 配置接口
+
+- `GET /config/llm`
+- `POST /config/llm`
+
 ### 业务接口
 
 - `GET /portfolio_summary`
@@ -153,18 +158,110 @@ GET /health
 
 ```json
 {
-  "status": "ok",
-  "lmdeploy_base_url": "https://api.openai.com/v1",
-  "lmdeploy_model": "gpt-4o-mini"
+  “status”: “ok”,
+  “lmdeploy_base_url”: “https://api.openai.com/v1”,
+  “lmdeploy_model”: “gpt-4o-mini”,
+  “api_key_configured”: true
 }
 ```
 
-> **注意：** `lmdeploy_base_url` 和 `lmdeploy_model` 的值由服务端环境变量决定。
-> 本地开发时为 OpenAI API，HPC 部署时为 LMDeploy + LLaMA。
+> **注意：** `api_key_configured` 为 `false` 时，前端 Settings Modal 会强制弹出。`LMDEPLOY_API_KEY=ollama` 时视为未配置（本地 Ollama 不需要 key）。
 
 ### 前端建议
-- 在页面顶部显示“服务正常 / 异常”
+- 在页面顶部显示”服务正常 / 异常”
 - 可在开发模式下显示模型路径和推理服务地址
+- 启动时检查 `api_key_configured`，为 false 则打开 Settings Modal
+
+---
+
+## 5.3 `GET /config/llm`
+
+### 用途
+返回当前 LLM 配置（endpoint、model、masked key hint）。
+
+### 请求
+
+```http
+GET /config/llm
+```
+
+### 示例响应
+
+```json
+{
+  “base_url”: “https://api.openai.com/v1”,
+  “model”: “gpt-4o-mini”,
+  “api_key_configured”: true,
+  “api_key_hint”: “sk-proj****”
+}
+```
+
+### TypeScript 类型
+
+```ts
+export interface LlmConfigResponse {
+  readonly base_url: string;
+  readonly model: string;
+  readonly api_key_configured: boolean;
+  readonly api_key_hint: string;
+}
+```
+
+---
+
+## 5.4 `POST /config/llm`
+
+### 用途
+运行时更新 LLM 配置（无需重启服务）。所有字段均为可选；省略字段保留当前值。
+
+### 请求头
+
+```http
+Content-Type: application/json
+```
+
+### 请求体
+
+```json
+{
+  “base_url”: “http://127.0.0.1:11434/v1”,
+  “model”: “llama3”,
+  “api_key”: “ollama”
+}
+```
+
+### 请求字段
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---:|---|
+| base_url | string | 否 | OpenAI-compatible endpoint URL |
+| model | string | 否 | 模型名称 |
+| api_key | string | 否 | API 密钥（传入后不会在响应中明文返回） |
+
+### 示例响应
+
+```json
+{
+  “base_url”: “http://127.0.0.1:11434/v1”,
+  “model”: “llama3”,
+  “api_key_configured”: false,
+  “api_key_hint”: “”
+}
+```
+
+### TypeScript 类型
+
+```ts
+export interface LlmConfigRequest {
+  readonly base_url?: string;
+  readonly model?: string;
+  readonly api_key?: string;
+}
+```
+
+### 前端建议
+- 使用 Settings Modal 调用此接口
+- 成功后重新调用 `/health` 确认 `api_key_configured`
 
 ---
 
@@ -641,7 +738,8 @@ curl -X POST "http://127.0.0.1:8000/upload/news" \
 
 建议拆成：
 
-- `api/system.ts`
+- `api/system.ts` — `/health`, `/`
+- `api/config.ts` — `/config/llm` (GET + POST)
 - `api/portfolio.ts`
 - `api/risk.ts`
 - `api/news.ts`
@@ -690,8 +788,9 @@ export async function uploadFiling(file: File) {
 
 建议前端按以下顺序联调：
 
-1. `GET /health`
-2. `GET /portfolio_summary`
+1. `GET /health` → 检查 `api_key_configured`
+2. `GET /config/llm` + `POST /config/llm` → Settings Modal 预填 & 保存
+3. `GET /portfolio_summary`
 3. `GET /risk_flags`
 4. `GET /news_impact`
 5. `POST /ask`

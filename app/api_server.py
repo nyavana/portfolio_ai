@@ -7,7 +7,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import ensure_directories, UPLOAD_FILINGS_DIR, UPLOAD_NEWS_DIR
-from app.schemas import QuestionRequest
+from app.schemas import QuestionRequest, LlmConfigRequest, LlmConfigResponse
 from core.lmdeploy_client import LMDeployClient
 from core.prompt_builder import (
     build_news_impact_prompt,
@@ -60,7 +60,36 @@ def health():
         "status": "ok",
         "lmdeploy_base_url": llm.base_url,
         "lmdeploy_model": llm.model,
+        "api_key_configured": bool(llm.api_key and llm.api_key != "ollama"),
     }
+
+
+def _make_config_response() -> LlmConfigResponse:
+    key = llm.api_key
+    configured = bool(key and key != "ollama")
+    hint = (key[:6] + "****") if (configured and len(key) > 8) else ("****" if configured else "")
+    return LlmConfigResponse(
+        base_url=llm.base_url,
+        model=llm.model,
+        api_key_configured=configured,
+        api_key_hint=hint,
+    )
+
+
+@app.get("/config/llm", response_model=LlmConfigResponse)
+def get_llm_config():
+    return _make_config_response()
+
+
+@app.post("/config/llm", response_model=LlmConfigResponse)
+def update_llm_config(req: LlmConfigRequest):
+    global llm
+    llm = LMDeployClient(
+        base_url=(req.base_url.rstrip("/") if req.base_url else llm.base_url),
+        model=(req.model or llm.model),
+        api_key=(req.api_key or llm.api_key),
+    )
+    return _make_config_response()
 
 
 @app.post("/upload/filing")

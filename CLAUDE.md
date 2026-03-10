@@ -48,12 +48,14 @@ RAG-based financial portfolio assistant: FastAPI serves endpoints that combine s
 ## Key Conventions
 
 - **LLM client:** Uses OpenAI SDK pointed at a configurable base URL. Uses `max_completion_tokens` (not `max_tokens`) for GPT-5+ compatibility. The `temperature` parameter is accepted but not passed to the API.
+- **Runtime LLM config:** `POST /config/llm` replaces the live `LMDeployClient` instance (base_url, model, api_key) without a server restart. Safe for single-process uvicorn (dev); multi-worker deployments would need a shared config store. `GET /config/llm` returns current config with a masked key hint.
 - **Config:** All paths and LLM settings are centralized in `app/config.py`, driven by env vars. `PROJECT_DIR` overrides the base directory (used by HPC deployment).
 - **CORS:** `CORSMiddleware` in `app/api_server.py` allows `localhost:5173` (frontend). Update `allow_origins` when deploying to a different host.
 - **ChromaDB version pinned to 0.6.3** — the SQLite schema is incompatible with chromadb 1.x. See README for migration notes if you hit `KeyError: '_type'`.
 - **PYTHONPATH** must include the project root for module imports to work (handled by `run_api.sh` and `bootstrap_filings.sh`).
 - **No test suite exists yet.** There are no tests directory or test files.
 - **Frontend:** React 19 + Vite 7 + TypeScript in `frontend/`. CSS Modules for styling, no CSS framework. `erasableSyntaxOnly: true` in tsconfig — avoid TypeScript class parameter properties and enums.
+- **Settings modal:** `ApiSettingsModal` (`frontend/src/components/Settings/`) auto-opens on startup if `api_key_configured` is false in `/health`. The gear icon in the sidebar footer opens it voluntarily at any time.
 
 ## Environment
 

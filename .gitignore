@@ -30,3 +30,5 @@ frontend/test-screenshots/
 # ── OS ───────────────────────────────────────────
 .DS_Store
 Thumbs.db
+
+CLAUDE.md

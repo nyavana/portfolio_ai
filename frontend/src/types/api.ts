@@ -21,6 +21,7 @@ export interface HealthResponse {
   readonly status: string;
   readonly lmdeploy_base_url: string;
   readonly lmdeploy_model: string;
+  readonly api_key_configured: boolean;
 }
 
 // ── Portfolio Summary ──
@@ -126,6 +127,20 @@ export interface UploadState {
   readonly uploading: boolean;
   readonly error: string | null;
   readonly result: UploadResponse | null;
+}
+
+// ── LLM Config ──
+export interface LlmConfigResponse {
+  readonly base_url: string;
+  readonly model: string;
+  readonly api_key_configured: boolean;
+  readonly api_key_hint: string;
+}
+
+export interface LlmConfigRequest {
+  readonly base_url?: string;
+  readonly model?: string;
+  readonly api_key?: string;
 }
 
 // ── Chat message (local state) ──

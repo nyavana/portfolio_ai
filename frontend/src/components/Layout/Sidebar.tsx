@@ -16,7 +16,11 @@ const NAV_ITEMS: readonly NavItem[] = [
   { path: '/status', icon: '●', label: 'System' },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  readonly onOpenSettings: () => void;
+}
+
+export function Sidebar({ onOpenSettings }: SidebarProps) {
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarLogo}>
@@ -38,6 +42,12 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className={styles.sidebarFooter}>
+        <button className={styles.settingsBtn} onClick={onOpenSettings}>
+          <span className={styles.navIcon}>⚙</span>
+          <span className={styles.navLabel}>Settings</span>
+        </button>
+      </div>
     </aside>
   );
 }

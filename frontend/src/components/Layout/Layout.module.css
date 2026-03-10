@@ -183,6 +183,40 @@
   color: var(--text-primary);
 }
 
+/* ── Sidebar footer (settings) ── */
+.sidebarFooter {
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.settingsBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm);
+  margin: 0 var(--space-sm);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  width: calc(100% - 2 * var(--space-sm));
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.settingsBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.sidebar:hover .settingsBtn {
+  padding-left: var(--space-md);
+}
+
 /* ── Main content ── */
 .main {
   margin-left: var(--sidebar-collapsed);
