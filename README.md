@@ -261,6 +261,31 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
+### Pull from Docker Hub
+
+A pre-built image is published automatically on every push to `main` via GitHub Actions. No need to clone the repo or build locally on remote servers:
+
+```bash
+docker pull nyavana/portfolio-ai:latest
+
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-...your-key... \
+  -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
+  -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
+  nyavana/portfolio-ai:latest
+```
+
+With persistent data volume:
+
+```bash
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-... \
+  -v $(pwd)/DATA:/app/DATA \
+  nyavana/portfolio-ai:latest
+```
+
+Each push to `main` also creates a pinned tag using the Git commit SHA (e.g. `nyavana/portfolio-ai:abc1234`) for reproducible deployments.
+
 ---
 
 ## HPC Deployment (SLURM)
