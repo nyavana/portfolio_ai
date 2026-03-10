@@ -107,15 +107,17 @@ GET /openapi.json
 
 ## 5. 基础接口定义
 
-## 5.1 `GET /`
+## 5.1 `GET /api/status` (容器) / `GET /` (开发)
 
 ### 用途
 返回服务状态和可用路由列表。
 
+> **注意：** Docker 容器内路由为 `/api/status`（避免与 SPA catch-all 冲突）。开发环境仍为 `/`。
+
 ### 请求
 
 ```http
-GET /
+GET /api/status
 ```
 
 ### 示例响应
@@ -478,13 +480,20 @@ export interface NewsImpactResponse {
 - portfolio summary
 - risk flags
 - news impact
-- financial QA / RAG
+- financial QA / RAG（Financial Q&A，走 ChromaDB 检索）
+
+所有 LLM 请求（含 `qa` / RAG 路由）均优先使用请求头中的 LLM 配置，以覆盖服务端环境变量。
 
 ### 请求头
 
 ```http
 Content-Type: application/json
+X-Api-Key: sk-...your-key...          # 可选，覆盖 LMDEPLOY_API_KEY
+X-Api-Base-Url: https://...           # 可选，覆盖 LMDEPLOY_BASE_URL
+X-Api-Model: gpt-4o                   # 可选，覆盖 LMDEPLOY_MODEL
 ```
+
+> Settings Modal 会在每次请求时自动注入以上三个头，确保 Financial Q&A 也能正确使用用户配置的 API Key。
 
 ### 请求体
 
@@ -757,12 +766,15 @@ export async function getPortfolioSummary() {
   return res.json();
 }
 
-export async function askQuestion(question: string) {
+export async function askQuestion(question: string, apiKey?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (apiKey) headers["X-Api-Key"] = apiKey;
+
   const res = await fetch(`${API_BASE_URL}/ask`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify({ question }),
   });
   if (!res.ok) throw new Error(await res.text());

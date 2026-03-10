@@ -160,11 +160,14 @@ Docs available at: `http://127.0.0.1:8000/docs`
 # Health check
 curl -s http://127.0.0.1:8000/health | python3 -m json.tool
 
-# Full LLM round-trip (requires valid API key)
+# Full LLM round-trip — pass key as a request header (overrides env var)
 curl -s -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
+  -H "X-Api-Key: sk-...your-key..." \
   -d '{"question": "What are the risk factors in the Apple filing?"}' \
   | python3 -m json.tool
+
+# Alternatively, set LMDEPLOY_API_KEY in .env.local and omit the header
 ```
 
 ---
@@ -307,15 +310,29 @@ See `portfolio_ai_frontend_mock_api.md` for full request/response schemas and Ty
 
 **CORS:** The backend allows cross-origin requests from `http://localhost:5173` and `http://127.0.0.1:5173` (configured in `app/api_server.py` via `CORSMiddleware`). Extend `allow_origins` when deploying to a different frontend host.
 
+**Per-request LLM override headers:**
+
+Every LLM-backed endpoint (`/portfolio_summary`, `/risk_flags`, `/news_impact`, `/ask`) reads three optional request headers and uses them in place of the server-side env vars:
+
+| Header | Overrides | Example |
+|---|---|---|
+| `X-Api-Key` | `LMDEPLOY_API_KEY` | `sk-abc...` |
+| `X-Api-Base-Url` | `LMDEPLOY_BASE_URL` | `https://api.openai.com/v1` |
+| `X-Api-Model` | `LMDEPLOY_MODEL` | `gpt-4o` |
+
+This is how the Settings modal in the UI injects the key configured by the user without a server restart. If a header is absent the server-side default is used.
+
 **Quick reference:**
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/` | Service status and route list |
+| `GET` | `/api/status` | Service status and route list (Docker) / `/` in dev |
 | `GET` | `/health` | LLM connectivity check |
+| `GET` | `/config/llm` | Current LLM config (masked key hint) |
+| `POST` | `/config/llm` | Replace server-side LLM config at runtime |
 | `GET` | `/portfolio_summary` | Structured summary + LLM narrative |
 | `GET` | `/risk_flags` | Rule-based flags + LLM explanation |
 | `GET` | `/news_impact` | News matched to holdings + LLM summary |
-| `POST` | `/ask` | Unified QA — routes to above or RAG |
+| `POST` | `/ask` | Unified QA — routes to above or RAG (Financial Q&A) |
 | `POST` | `/upload/filing` | Upload and index a filing document |
 | `POST` | `/upload/news` | Upload and index a news document |
