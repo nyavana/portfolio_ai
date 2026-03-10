@@ -1,5 +1,7 @@
 # Portfolio AI Assistant
 
+**Languages:** English | [简体中文](README.zh-CN.md)
+
 A RAG-based financial portfolio assistant powered by FastAPI, ChromaDB, and an OpenAI-compatible LLM — with a React frontend ("Dark Terminal Editorial" design).
 
 ## Architecture
