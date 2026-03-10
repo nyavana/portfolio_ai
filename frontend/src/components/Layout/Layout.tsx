@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { ApiSettingsModal } from '../Settings/ApiSettingsModal';
 import { getHealth } from '../../api/system';
+import { getStoredLlmConfig } from '../../api/llmSession';
 import styles from './Layout.module.css';
 
 const PAGE_TITLES: Record<string, string> = {
@@ -24,31 +25,25 @@ export function Layout() {
   const [startupChecking, setStartupChecking] = useState(true);
 
   useEffect(() => {
+    const stored = getStoredLlmConfig();
+    if (stored?.api_key) {
+      setStartupChecking(false);
+      return;
+    }
     getHealth()
       .then((h) => {
-        if (!h.api_key_configured) {
-          setForceSettings(true);
-          setSettingsOpen(true);
-        }
+        if (!h.api_key_configured) { setForceSettings(true); setSettingsOpen(true); }
       })
-      .catch(() => {
-        setForceSettings(true);
-        setSettingsOpen(true);
-      })
+      .catch(() => { setForceSettings(true); setSettingsOpen(true); })
       .finally(() => setStartupChecking(false));
   }, []);
 
   const handleSettingsSaved = useCallback(() => {
-    getHealth()
-      .then((h) => {
-        if (h.api_key_configured) {
-          setForceSettings(false);
-          setSettingsOpen(false);
-        }
-      })
-      .catch(() => {
-        // keep modal open if health check fails
-      });
+    const stored = getStoredLlmConfig();
+    if (stored?.api_key) {
+      setForceSettings(false);
+      setSettingsOpen(false);
+    }
   }, []);
 
   const handleCloseSettings = useCallback(() => {

@@ -23,6 +23,20 @@ PYTHONPATH=. .venv/bin/python -m ingest.index_news --file DATA/uploads/news/some
 
 # Install frontend dependencies
 cd frontend && npm install
+
+# --- Docker ---
+# Build single-container image (builds frontend + backend together)
+docker build -t portfolio-ai .
+
+# Run the container (serves UI + API on port 8000)
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-...your-key... \
+  -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
+  -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
+  portfolio-ai
+
+# Run with a local .env.local file and persistent DATA volume
+docker run -p 8000:8000 --env-file .env.local -v $(pwd)/DATA:/app/DATA portfolio-ai
 ```
 
 ## Architecture
@@ -56,6 +70,7 @@ RAG-based financial portfolio assistant: FastAPI serves endpoints that combine s
 - **No test suite exists yet.** There are no tests directory or test files.
 - **Frontend:** React 19 + Vite 7 + TypeScript in `frontend/`. CSS Modules for styling, no CSS framework. `erasableSyntaxOnly: true` in tsconfig — avoid TypeScript class parameter properties and enums.
 - **Settings modal:** `ApiSettingsModal` (`frontend/src/components/Settings/`) auto-opens on startup if `api_key_configured` is false in `/health`. The gear icon in the sidebar footer opens it voluntarily at any time.
+- **Container mode (Docker):** When `frontend/dist/` exists, `app/api_server.py` mounts it as static files and adds a SPA catch-all route `/{full_path:path}` → `index.html`. The original root endpoint `/` was renamed to `/api/status` to avoid conflict with the catch-all. `VITE_API_BASE_URL=""` at build time makes the frontend use relative API paths so everything resolves to the same origin (port 8000).
 
 ## Environment
 

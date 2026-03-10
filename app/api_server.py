@@ -3,11 +3,11 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import ensure_directories, UPLOAD_FILINGS_DIR, UPLOAD_NEWS_DIR
-from app.schemas import QuestionRequest, LlmConfigRequest, LlmConfigResponse
+from app.schemas import QuestionRequest, LlmConfigResponse
 from core.lmdeploy_client import LMDeployClient
 from core.prompt_builder import (
     build_news_impact_prompt,
@@ -34,6 +34,13 @@ app.add_middleware(
 
 ensure_directories()
 llm = LMDeployClient()
+
+
+def _get_llm_from_request(request: Request) -> LMDeployClient:
+    api_key  = request.headers.get("X-Api-Key")      or llm.api_key
+    base_url = request.headers.get("X-Api-Base-Url") or llm.base_url
+    model    = request.headers.get("X-Api-Model")    or llm.model
+    return LMDeployClient(base_url=base_url, api_key=api_key, model=model)
 
 
 @app.get("/api/status")
@@ -80,16 +87,6 @@ def _make_config_response() -> LlmConfigResponse:
 def get_llm_config():
     return _make_config_response()
 
-
-@app.post("/config/llm", response_model=LlmConfigResponse)
-def update_llm_config(req: LlmConfigRequest):
-    global llm
-    llm = LMDeployClient(
-        base_url=(req.base_url.rstrip("/") if req.base_url else llm.base_url),
-        model=(req.model or llm.model),
-        api_key=(req.api_key or llm.api_key),
-    )
-    return _make_config_response()
 
 
 @app.post("/upload/filing")
@@ -147,27 +144,27 @@ def upload_news(file: UploadFile = File(...)):
 
 
 @app.get("/portfolio_summary")
-def portfolio_summary():
+def portfolio_summary(request: Request):
     summary = compute_portfolio_summary()
     prompt = build_portfolio_summary_prompt(summary)
-    answer = llm.chat("You are a financial portfolio assistant.", prompt)
+    answer = _get_llm_from_request(request).chat("You are a financial portfolio assistant.", prompt)
     return {"summary_data": summary, "llm_summary": answer}
 
 
 @app.get("/risk_flags")
-def risk_flags():
+def risk_flags(request: Request):
     summary = compute_portfolio_summary()
     flags = detect_risk_flags()
     prompt = build_risk_flags_prompt(flags, summary)
-    answer = llm.chat("You are a careful financial risk assistant.", prompt)
+    answer = _get_llm_from_request(request).chat("You are a careful financial risk assistant.", prompt)
     return {"flags": flags, "llm_risk_summary": answer}
 
 
 @app.get("/news_impact")
-def news_impact():
+def news_impact(request: Request):
     result = get_news_impact()
     prompt = build_news_impact_prompt(result)
-    answer = llm.chat(
+    answer = _get_llm_from_request(request).chat(
         "You are a financial assistant analyzing portfolio news impact.",
         prompt,
     )
@@ -175,26 +172,27 @@ def news_impact():
 
 
 @app.post("/ask")
-def ask(req: QuestionRequest):
+def ask(req: QuestionRequest, request: Request):
     route = route_query(req.question)
+    req_llm = _get_llm_from_request(request)
 
     if route == "portfolio_summary":
         summary = compute_portfolio_summary()
         prompt = build_portfolio_summary_prompt(summary) + f"\n\nUser question: {req.question}"
-        answer = llm.chat("You are a financial portfolio assistant.", prompt)
+        answer = req_llm.chat("You are a financial portfolio assistant.", prompt)
         return {"route": route, "answer": answer, "data": summary}
 
     if route == "risk_flags":
         summary = compute_portfolio_summary()
         flags = detect_risk_flags()
         prompt = build_risk_flags_prompt(flags, summary) + f"\n\nUser question: {req.question}"
-        answer = llm.chat("You are a careful financial risk assistant.", prompt)
+        answer = req_llm.chat("You are a careful financial risk assistant.", prompt)
         return {"route": route, "answer": answer, "data": flags}
 
     if route == "news_impact":
         news = get_news_impact()
         prompt = build_news_impact_prompt(news) + f"\n\nUser question: {req.question}"
-        answer = llm.chat(
+        answer = req_llm.chat(
             "You are a financial assistant analyzing portfolio news impact.",
             prompt,
         )

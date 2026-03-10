@@ -192,6 +192,72 @@ DATA/
 
 ---
 
+## Docker Deployment
+
+The repository ships with a multi-stage `Dockerfile` that builds the React frontend and runs the FastAPI backend in a single container. No separate web server is required — FastAPI serves the compiled frontend from `frontend/dist/`.
+
+### Build the image
+
+```bash
+docker build -t portfolio-ai .
+```
+
+### Run the container
+
+```bash
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-...your-key... \
+  -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
+  -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
+  portfolio-ai
+```
+
+The app is then available at `http://localhost:8000` (frontend UI) and `http://localhost:8000/docs` (API docs).
+
+**How it works:**
+
+| Stage | Base image | What it does |
+|---|---|---|
+| `frontend-builder` | `node:20-alpine` | `npm ci && npm run build` with `VITE_API_BASE_URL=""` |
+| final | `python:3.12-slim` | installs Python deps, copies backend + `frontend/dist/`, starts uvicorn |
+
+Setting `VITE_API_BASE_URL=""` at build time makes the React app call relative paths (e.g. `/portfolio_summary`) so the browser resolves them against the container's own port — no CORS or cross-origin issues.
+
+> **Note:** The `/` root endpoint is renamed to `/api/status` inside the container to avoid conflicting with the SPA catch-all route that returns `index.html` for all unmatched paths (required for React Router).
+
+### Environment variables for Docker
+
+Pass them via `-e` flags or a `.env` file (`--env-file .env.local`):
+
+| Variable | Description |
+|---|---|
+| `LMDEPLOY_API_KEY` | Required — your LLM API key |
+| `LMDEPLOY_BASE_URL` | LLM endpoint (default: OpenAI) |
+| `LMDEPLOY_MODEL` | Model name |
+
+**Using Ollama inside Docker (same host):**
+
+```bash
+docker run -p 8000:8000 \
+  -e LMDEPLOY_BASE_URL=http://host.docker.internal:11434/v1 \
+  -e LMDEPLOY_MODEL=llama3.2:3b \
+  -e LMDEPLOY_API_KEY=ollama \
+  portfolio-ai
+```
+
+### Data persistence
+
+ChromaDB databases live inside the container at `/app/DATA/`. To persist them across restarts, mount a volume:
+
+```bash
+docker run -p 8000:8000 \
+  -e LMDEPLOY_API_KEY=sk-... \
+  -v $(pwd)/DATA:/app/DATA \
+  portfolio-ai
+```
+
+---
+
 ## HPC Deployment (SLURM)
 
 Use `api_server.sbatch` for GPU cluster deployment. The sbatch script exports all required
