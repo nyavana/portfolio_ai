@@ -8,7 +8,7 @@ A RAG-based financial portfolio assistant built with FastAPI, ChromaDB, and an O
 
 ![Live use cases](docs/images/Portfolio_AI_Front.png)
 
-The interface brings the main product flows together in one place: portfolio analysis, risk review, and interactive financial Q&A.
+The project presents a financial AI assistant for portfolio analysis, risk review, and interactive financial Q&A.
 
 ## Overview
 

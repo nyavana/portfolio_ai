@@ -6,6 +6,10 @@
 
 这是一个基于 RAG 的金融投资组合助手，使用 FastAPI、ChromaDB 和兼容 OpenAI 的 LLM 构建，并提供采用 “Dark Terminal Editorial” 风格的 React 前端。
 
+![实时用例演示](../images/Portfolio_AI_Front.png)
+
+该项目展示了一个用于投资组合分析、风险审查和交互式金融问答的 AI 助手。
+
 ## 概览
 
 该应用将 React 前端、FastAPI 后端、基于 ChromaDB 的 filings 与新闻检索，以及兼容 OpenAI 的 LLM API 组合在一起。
