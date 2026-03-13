@@ -2,22 +2,34 @@
 
 **语言：** [English](../../README.md) | 简体中文
 
-[![Docker Image](https://img.shields.io/docker/v/nyavana/portfolio-ai/latest?label=image)](https://hub.docker.com/r/nyavana/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
+[![Docker Image](https://img.shields.io/docker/v/ggdxwz/portfolio-ai/latest?label=image)](https://hub.docker.com/r/ggdxwz/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
 
 这是一个基于 RAG 的金融投资组合助手，使用 FastAPI、ChromaDB 和兼容 OpenAI 的 LLM 构建，并提供采用 “Dark Terminal Editorial” 风格的 React 前端。
 
 ![实时用例演示](../images/Portfolio_AI_Front.png)
 
-该项目展示了一个用于投资组合分析、风险审查和交互式金融问答的 AI 助手。
+该项目展示了一个用于投资组合分析、风险审查和交互式金融问答的金融 AI 助手。
 
 ## 概览
 
-该应用将 React 前端、FastAPI 后端、基于 ChromaDB 的 filings 与新闻检索，以及兼容 OpenAI 的 LLM API 组合在一起。
+该应用结合了 React 前端、FastAPI 后端、基于 ChromaDB 的 filings 与新闻检索，以及兼容 OpenAI 的 LLM API。
 
 - 前端：Dashboard、Risk Flags、News、Chat、Upload 和 Status 页面
 - 后端：投资组合摘要、风险标记分析、新闻影响分析、上传和统一问答
 - 检索：`chroma_news` 用于新闻，`chroma_filings` 用于 SEC 风格的 filing 内容
 - 部署方式：Docker、本地开发，以及基于 SLURM 的 HPC 部署
+
+### 产品视图
+
+下方截图展示了后端所支撑的核心 UI 流程。
+
+![投资组合总览与风险分析](../images/Portfolio%20AI%20Overview%20and%20Risk.png)
+
+Dashboard 将投资组合摘要数据、基于规则的风险标记，以及面向示例持仓生成的 LLM 叙述整合在一起。
+
+![投资组合摘要](../images/Portfolio%20AI%20Summery.png)
+
+该视图重点展示投资组合总价值、持仓、行业敞口，以及助手返回的结构化摘要。
 
 ## 快速开始
 
@@ -38,13 +50,13 @@ docker run -p 8000:8000 \
 ### 方式 2：从 Docker Hub 拉取
 
 ```bash
-docker pull nyavana/portfolio-ai:latest
+docker pull ggdxwz/portfolio-ai:latest
 
 docker run -p 8000:8000 \
   -e LMDEPLOY_API_KEY=sk-...your-key... \
   -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
   -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
-  nyavana/portfolio-ai:latest
+  ggdxwz/portfolio-ai:latest
 ```
 
 应用可通过以下地址访问：
@@ -224,6 +236,14 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 | `POST` | `/upload/filing` | 上传并索引 filing 文档 |
 | `POST` | `/upload/news` | 上传并索引 news 文档 |
 
+### Financial Q&A（RAG）
+
+同一个后端也支撑基于 filing 的交互式问答流程。在 Chat 视图中，用户可以提出一个具体问题，后端会将其路由到 RAG 流水线，答案则基于检索出的文档上下文生成。
+
+![金融问答](../images/Portfolio%20AI%20Q%26A.png)
+
+该界面展示了由 `/ask` 路由和 filings/news 检索流水线支撑的问题回答流程。
+
 ## 架构
 
 ```text
@@ -362,13 +382,13 @@ docker run -p 8000:8000 \
 通过 GitHub Actions，每次推送到 `main` 时都会自动发布预构建镜像。你无需克隆仓库，也无需在远程服务器上本地构建：
 
 ```bash
-docker pull nyavana/portfolio-ai:latest
+docker pull ggdxwz/portfolio-ai:latest
 
 docker run -p 8000:8000 \
   -e LMDEPLOY_API_KEY=sk-...your-key... \
   -e LMDEPLOY_BASE_URL=https://api.openai.com/v1 \
   -e LMDEPLOY_MODEL=gpt-5.3-chat-latest \
-  nyavana/portfolio-ai:latest
+  ggdxwz/portfolio-ai:latest
 ```
 
 如需持久化数据卷：
@@ -377,10 +397,10 @@ docker run -p 8000:8000 \
 docker run -p 8000:8000 \
   -e LMDEPLOY_API_KEY=sk-... \
   -v $(pwd)/DATA:/app/DATA \
-  nyavana/portfolio-ai:latest
+  ggdxwz/portfolio-ai:latest
 ```
 
-每次推送到 `main` 还会基于 Git commit SHA 生成一个固定标签，例如 `nyavana/portfolio-ai:abc1234`，便于可复现部署。
+每次推送到 `main` 还会基于 Git commit SHA 生成一个固定标签，例如 `ggdxwz/portfolio-ai:abc1234`，便于可复现部署。
 
 ## HPC 部署（SLURM）
 
