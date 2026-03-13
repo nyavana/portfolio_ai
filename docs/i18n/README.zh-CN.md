@@ -15,7 +15,7 @@
 应用结构不复杂：React 前端负责界面，FastAPI 后端负责接口，ChromaDB 检索 filings 和新闻，再把上下文交给兼容 OpenAI 的 LLM。
 
 - 前端：Dashboard、Risk Flags、News、Chat、Upload 和 Status 页面
-- 后端：投资组合摘要、风险标记分析、新闻影响分析、上传和统一问答
+- 后端：投资组合摘要、风险标记分析、按 ticker 归类的新闻影响分析、上传和统一问答
 - 检索：`chroma_news` 用于新闻，`chroma_filings` 用于 SEC 风格的 filing 内容
 - 部署方式：Docker、本地开发，以及基于 SLURM 的 HPC 部署
 
@@ -123,15 +123,18 @@ cp .env.example .env.local
 | `TOKENIZERS_PARALLELISM` | `false` | 抑制 tokenizer 警告 |
 | `PROJECT_DIR` | *(auto: repo root)* | 覆盖数据目录根路径 |
 
-### 4. 初始化 filings 向量数据库
+### 4. 初始化向量数据库
 
-`chroma_news` 已经预填好了。`chroma_filings` 还得先用 mock 文件初始化：
+如果你想从结构化 demo 新闻和当前已上传新闻重建一个干净的 `chroma_news`，先跑新闻初始化脚本。`chroma_filings` 也需要用 mock 文件初始化：
 
 ```bash
+bash scripts/bootstrap_news.sh
 bash scripts/bootstrap_filings.sh
 ```
 
-这一步会把 `DATA/uploads/filings/filing_apple_q_mock.txt` 和 `filing_nvidia_q_mock.txt` 索引进去。
+`bootstrap_news.sh` 会重置 `news` collection，重新索引 `DATA/news/demo_news.json`，再把 `DATA/uploads/news/` 下的文件全部补回去。News Impact 页面会基于这个 collection 返回 ticker 专属新闻，以及单独的 `general_news` 分组，用来放宏观或跨多个持仓的新闻。
+
+`bootstrap_filings.sh` 会把 `DATA/uploads/filings/filing_apple_q_mock.txt` 和 `filing_nvidia_q_mock.txt` 索引进去。
 `all-MiniLM-L6-v2` 这个嵌入模型（约 22 MB）会在第一次运行时下载，随后缓存到 `HF_HOME`。
 
 ### 5. 启动后端
@@ -183,6 +186,11 @@ ollama pull llama3.2:3b
 # 健康检查
 curl -s http://127.0.0.1:8000/health | python3 -m json.tool
 
+# 查看新闻影响分组
+curl -s http://127.0.0.1:8000/news_impact \
+  -H "X-Api-Key: sk-...your-key..." \
+  | python3 -m json.tool
+
 # 完整 LLM 往返测试：通过请求头传入 key（会覆盖环境变量）
 curl -s -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
@@ -223,10 +231,19 @@ UI 里的设置弹窗就是靠这几个请求头把用户的 key 传给后端的
 | `POST` | `/config/llm` | 在运行时替换服务端 LLM 配置 |
 | `GET` | `/portfolio_summary` | 结构化摘要 + LLM 叙述 |
 | `GET` | `/risk_flags` | 基于规则的标记 + LLM 解释 |
-| `GET` | `/news_impact` | 与持仓匹配的新闻 + LLM 摘要 |
+| `GET` | `/news_impact` | ticker 专属新闻 + `general_news` + LLM 摘要 |
 | `POST` | `/ask` | 统一问答，路由到上述能力或 RAG（Financial Q&A） |
 | `POST` | `/upload/filing` | 上传并索引 filing 文档 |
 | `POST` | `/upload/news` | 上传并索引 news 文档 |
+
+### News Impact 行为
+
+`GET /news_impact` 现在不再对每个 ticker 单独做语义 top-`k` 检索，而是先遍历整个新闻索引，再把每条新闻精确分到一个目标里：
+
+- `news_data`：只放单一 ticker 的新闻
+- `general_news`：放宏观、板块级、或同时命中多个持仓的新闻
+
+从 `DATA/news/demo_news.json` 建的结构化新闻会保留 ticker metadata；普通 `.txt` 上传新闻则退回到 ticker / 公司名匹配。
 
 ## 架构
 
@@ -247,7 +264,7 @@ UI 里的设置弹窗就是靠这几个请求头把用户的 key 传给后端的
            ▼             ▼             ▼
      ChromaDB        ChromaDB      OpenAI-compatible
    (chroma_news)  (chroma_filings)   LLM API
-   5 news docs     2 filing docs   gpt-5.3-chat-latest (local)
+   demo + uploads  2 filing docs   gpt-5.3-chat-latest (local)
                                    LLaMA (HPC)
 ```
 
@@ -292,7 +309,7 @@ DATA/
 ├── processed/
 │   ├── filings/
 │   └── news/
-├── chroma_news/                   # ChromaDB：5 个文档（预填充）
+├── chroma_news/                   # ChromaDB：demo + 已上传新闻（可用 bootstrap_news.sh 重建）
 ├── chroma_filings/                # ChromaDB：2 个文档（已初始化）
 └── hf_home/                       # HuggingFace 模型缓存
 ```
@@ -409,6 +426,12 @@ ssh -L 8000:localhost:8000 <hpc-host>
 ```
 
 ## ChromaDB 说明
+
+如果你改了 demo 新闻或上传新闻后，News Impact 页面还是显示旧的或分组不对的结果，先重建新闻 collection：
+
+```bash
+bash scripts/bootstrap_news.sh
+```
 
 `chroma_news` 这个 SQLite 数据库是用较旧版本的 chromadb 创建的。如果升级后碰到 `KeyError: '_type'`，补一下 `config_json_str` 列：
 

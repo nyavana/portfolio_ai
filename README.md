@@ -15,7 +15,7 @@ The project is meant for portfolio analysis, risk review, and financial Q&A grou
 At a high level, the app pairs a React frontend with a FastAPI backend, then uses ChromaDB to retrieve filings and news before sending context to an OpenAI-compatible LLM.
 
 - Frontend: Dashboard, Risk Flags, News, Chat, Upload, and Status views
-- Backend: portfolio summary, risk flag analysis, news impact analysis, uploads, and unified Q&A
+- Backend: portfolio summary, risk flag analysis, ticker-aware news impact analysis, uploads, and unified Q&A
 - Retrieval: `chroma_news` for news and `chroma_filings` for SEC-style filing content
 - Deployment options: Docker, local development, and SLURM-based HPC deployment
 
@@ -123,15 +123,18 @@ cp .env.example .env.local
 | `TOKENIZERS_PARALLELISM` | `false` | Suppress tokenizer warnings |
 | `PROJECT_DIR` | *(auto: repo root)* | Override data directory base |
 
-### 4. Bootstrap the filings vector DB
+### 4. Bootstrap the vector DBs
 
-`chroma_news` already has data. `chroma_filings` still needs to be bootstrapped from the mock files:
+Rebuild `chroma_news` if you want a clean deterministic news index from the demo JSON plus any uploaded news files. Bootstrap `chroma_filings` from the mock filing files:
 
 ```bash
+bash scripts/bootstrap_news.sh
 bash scripts/bootstrap_filings.sh
 ```
 
-This indexes `DATA/uploads/filings/filing_apple_q_mock.txt` and `filing_nvidia_q_mock.txt`.
+`bootstrap_news.sh` resets the `news` collection, indexes `DATA/news/demo_news.json`, then re-indexes every file under `DATA/uploads/news/`. The News Impact view uses that collection to produce ticker-specific matches plus a separate `general_news` bucket for macro or multi-holding articles.
+
+`bootstrap_filings.sh` indexes `DATA/uploads/filings/filing_apple_q_mock.txt` and `filing_nvidia_q_mock.txt`.
 The `all-MiniLM-L6-v2` embedding model (~22 MB) is downloaded the first time and cached in `HF_HOME`.
 
 ### 5. Start the backend
@@ -183,6 +186,11 @@ The HPC LLaMA deployment via LMDeploy is unaffected because it ignores unknown p
 # Health check
 curl -s http://127.0.0.1:8000/health | python3 -m json.tool
 
+# News impact buckets
+curl -s http://127.0.0.1:8000/news_impact \
+  -H "X-Api-Key: sk-...your-key..." \
+  | python3 -m json.tool
+
 # Full LLM round-trip — pass key as a request header (overrides env var)
 curl -s -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
@@ -223,10 +231,19 @@ This is how the Settings modal in the UI passes the user's key without requiring
 | `POST` | `/config/llm` | Replace server-side LLM config at runtime |
 | `GET` | `/portfolio_summary` | Structured summary + LLM narrative |
 | `GET` | `/risk_flags` | Rule-based flags + LLM explanation |
-| `GET` | `/news_impact` | News matched to holdings + LLM summary |
+| `GET` | `/news_impact` | Ticker-specific news + `general_news` + LLM summary |
 | `POST` | `/ask` | Unified QA — routes to above or RAG (Financial Q&A) |
 | `POST` | `/upload/filing` | Upload and index a filing document |
 | `POST` | `/upload/news` | Upload and index a news document |
+
+### News Impact behavior
+
+`GET /news_impact` no longer does a per-ticker semantic top-`k` lookup. It loads the indexed news set once, assigns each article to exactly one destination, and returns:
+
+- `news_data`: ticker-specific articles only
+- `general_news`: macro, sector-wide, or multi-holding articles
+
+Structured news indexed from `DATA/news/demo_news.json` keeps ticker metadata, while plain `.txt` uploads fall back to ticker/company name matching.
 
 ## Architecture
 
@@ -247,7 +264,7 @@ This is how the Settings modal in the UI passes the user's key without requiring
            ▼             ▼             ▼
      ChromaDB        ChromaDB      OpenAI-compatible
    (chroma_news)  (chroma_filings)   LLM API
-   5 news docs     2 filing docs   gpt-5.3-chat-latest (local)
+   demo + uploads  2 filing docs   gpt-5.3-chat-latest (local)
                                    LLaMA (HPC)
 ```
 
@@ -292,7 +309,7 @@ DATA/
 ├── processed/
 │   ├── filings/
 │   └── news/
-├── chroma_news/                   # ChromaDB: 5 docs (pre-populated)
+├── chroma_news/                   # ChromaDB: demo + uploaded news (rebuild with bootstrap_news.sh)
 ├── chroma_filings/                # ChromaDB: 2 docs (bootstrapped)
 └── hf_home/                       # HuggingFace model cache
 ```
@@ -409,6 +426,12 @@ ssh -L 8000:localhost:8000 <hpc-host>
 ```
 
 ## ChromaDB Notes
+
+If the News Impact page shows stale or incorrectly bucketed news after changing demo/uploaded files, rebuild the news collection:
+
+```bash
+bash scripts/bootstrap_news.sh
+```
 
 The `chroma_news` SQLite database was created with an older version of chromadb. If you upgrade and hit `KeyError: '_type'`, patch the `config_json_str` column:
 
