@@ -21,7 +21,7 @@
 
 ### 产品视图
 
-<p align="center"><img src="../images/Portfolio%20AI%20Summery.png" alt="项目摘要" width="33.3333%"><img src="../images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="投资组合总览与风险分析" width="33.3333%"><img src="../images/Portfolio%20AI%20Q%26A.png" alt="金融问答" width="33.3333%"></p>
+<p align="center"><img src="../images/Portfolio%20AI%20Summery.png" alt="项目摘要" width="100%"><img src="../images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="投资组合总览与风险分析" width="100%"><img src="../images/Portfolio%20AI%20Q%26A.png" alt="金融问答" width="100%"></p>
 
 ## 快速开始
 

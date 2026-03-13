@@ -21,7 +21,7 @@ The application combines a React frontend, a FastAPI backend, ChromaDB-backed re
 
 ### Product Views
 
-<p align="center"><img src="docs/images/Portfolio%20AI%20Summery.png" alt="Project summary" width="33.3333%"><img src="docs/images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="Portfolio overview and risk analysis" width="33.3333%"><img src="docs/images/Portfolio%20AI%20Q%26A.png" alt="Financial Q&A" width="33.3333%"></p>
+<p align="center"><img src="docs/images/Portfolio%20AI%20Summery.png" alt="Project summary" width="100%"><img src="docs/images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="Portfolio overview and risk analysis" width="100%"><img src="docs/images/Portfolio%20AI%20Q%26A.png" alt="Financial Q&A" width="100%"></p>
 
 ## Quick Start
 
