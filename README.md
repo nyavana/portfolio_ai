@@ -2,7 +2,7 @@
 
 **Languages:** English | [简体中文](docs/i18n/README.zh-CN.md)
 
-[![Docker Image](https://img.shields.io/docker/v/nyavana/portfolio-ai/latest?label=image)](https://hub.docker.com/r/nyavana/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
+[![Docker Image](https://img.shields.io/docker/v/nyavana/portfolio-ai/latest?label=image)](https://hub.docker.com/r/ggdxwz/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
 
 A RAG-based financial portfolio assistant built with FastAPI, ChromaDB, and an OpenAI-compatible LLM, with a React frontend in a "Dark Terminal Editorial" style.
 
