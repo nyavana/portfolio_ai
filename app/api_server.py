@@ -177,7 +177,11 @@ def news_impact(request: Request):
         "You are a financial assistant analyzing portfolio news impact.",
         prompt,
     )
-    return {"news_data": result, "llm_news_summary": answer}
+    return {
+        "news_data": result["news_data"],
+        "general_news": result["general_news"],
+        "llm_news_summary": answer,
+    }
 
 
 @app.post("/ask")

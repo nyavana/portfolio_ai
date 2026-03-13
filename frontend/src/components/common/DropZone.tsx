@@ -9,7 +9,7 @@ interface DropZoneProps {
   readonly uploading?: boolean;
 }
 
-export function DropZone({ label, accept = '.txt,.json,.csv,.pdf,.md', onFile, uploading }: DropZoneProps) {
+export function DropZone({ label, accept = '.txt,.json,.csv', onFile, uploading }: DropZoneProps) {
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 

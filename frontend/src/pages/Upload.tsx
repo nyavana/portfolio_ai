@@ -5,6 +5,8 @@ import { uploadFiling, uploadNews } from '../api/upload';
 import type { UploadResponse } from '../types/api';
 import styles from './Pages.module.css';
 
+const SUPPORTED_UPLOAD_TYPES = '.txt, .json, .csv';
+
 interface UploadResult {
   readonly type: 'filing' | 'news';
   readonly filename: string;
@@ -53,6 +55,10 @@ export function Upload() {
   return (
     <div className={styles.stackLayout}>
       {error && <ErrorBanner message={error} />}
+
+      <p className="text-secondary" style={{ margin: '0 0 var(--space-md)' }}>
+        Supported file types: <span className="mono">{SUPPORTED_UPLOAD_TYPES}</span>
+      </p>
 
       {/* Upload Zones */}
       <div className={styles.uploadGrid}>

@@ -86,6 +86,7 @@ export interface NewsImpactItem {
 
 export interface NewsImpactResponse {
   readonly news_data: readonly NewsImpactItem[];
+  readonly general_news: readonly NewsDocumentItem[];
   readonly llm_news_summary: string;
 }
 

@@ -23,9 +23,15 @@ Write a brief risk overview with severity and explanation.
 
 
 def build_news_impact_prompt(news_impact: dict) -> str:
+    news_data = news_impact.get("news_data", [])
+    general_news = news_impact.get("general_news", [])
+
     return f"""
-Portfolio-linked news:
-{news_impact}
+Ticker-specific portfolio news:
+{news_data}
+
+General market news:
+{general_news}
 
 Summarize which holdings appear most affected and whether the impact seems positive, negative, or mixed.
 """

@@ -444,12 +444,22 @@ GET /news_impact
       ]
     }
   ],
+  "general_news": [
+    {
+      "text": "Broader market news highlighted renewed macroeconomic uncertainty and valuation pressure across large-cap equities.",
+      "metadata": {
+        "source": "uploaded_news",
+        "filename": "news_macro_risk_mock.txt"
+      }
+    }
+  ],
   "llm_news_summary": "Recent news is broadly supportive of AI-related holdings, especially semiconductor exposure, though valuation and supply-chain risk remain key watch items."
 }
 ```
 
 ### 前端展示建议
 - 按 ticker 分组展示新闻
+- 单独展示 `general_news`，用于不属于单一 ticker 的宏观/板块新闻
 - 每条新闻展示文本与 metadata
 - 底部统一展示 LLM 总结
 
@@ -468,6 +478,7 @@ export interface NewsImpactItem {
 
 export interface NewsImpactResponse {
   news_data: NewsImpactItem[];
+  general_news: NewsDocumentItem[];
   llm_news_summary: string;
 }
 ```
@@ -546,19 +557,22 @@ X-Api-Model: gpt-4o                   # 可选，覆盖 LMDEPLOY_MODEL
 {
   "route": "news_impact",
   "answer": "Recent news is supportive for semiconductor exposure but highlights valuation and supply constraints.",
-  "data": [
-    {
-      "ticker": "NVDA",
-      "matched_news": [
-        {
-          "text": "NVIDIA shares rose after strong AI chip demand.",
-          "metadata": {
-            "source": "uploaded_news"
+  "data": {
+    "news_data": [
+      {
+        "ticker": "NVDA",
+        "matched_news": [
+          {
+            "text": "NVIDIA shares rose after strong AI chip demand.",
+            "metadata": {
+              "source": "uploaded_news"
+            }
           }
-        }
-      ]
-    }
-  ]
+        ]
+      }
+    ],
+    "general_news": []
+  }
 }
 ```
 

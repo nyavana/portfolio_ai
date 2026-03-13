@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import csv
 import json
 import re
 import uuid
 from pathlib import Path
+from typing import Any
 
 import chromadb
 from sentence_transformers import SentenceTransformer
@@ -22,7 +25,7 @@ def normalize_text(text: str) -> str:
     return text
 
 
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP):
+def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
     text = normalize_text(text)
     if not text:
         return []
@@ -53,52 +56,76 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     return chunks
 
 
-def read_txt(path: Path) -> list[dict]:
+def _merge_title_and_text(title: Any, body: Any) -> str:
+    title_text = normalize_text(str(title)) if title else ""
+    body_text = normalize_text(str(body)) if body else ""
+
+    if title_text and body_text:
+        if body_text.lower().startswith(title_text.lower()):
+            return body_text
+        return f"{title_text} {body_text}"
+    return title_text or body_text
+
+
+def read_txt(path: Path) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8", errors="ignore")
     return [{"text": text, "source_file": path.name}]
 
 
-def read_json(path: Path) -> list[dict]:
+def read_json(path: Path) -> list[dict[str, Any]]:
     data = json.loads(path.read_text(encoding="utf-8"))
 
     if isinstance(data, list):
-        rows = []
+        rows: list[dict[str, Any]] = []
         for i, item in enumerate(data):
             if isinstance(item, dict):
-                text = item.get("text") or item.get("content") or item.get("body") or item.get("title") or ""
-                rows.append({
-                    "text": text,
-                    "source_file": path.name,
-                    "row_id": i,
-                    **{k: v for k, v in item.items() if k != "text"}
-                })
+                text = _merge_title_and_text(
+                    item.get("title"),
+                    item.get("text") or item.get("content") or item.get("body"),
+                )
+                rows.append(
+                    {
+                        "text": text,
+                        "source_file": path.name,
+                        "row_id": i,
+                        **{k: v for k, v in item.items() if k != "text"},
+                    }
+                )
         return rows
 
     if isinstance(data, dict):
-        text = data.get("text") or data.get("content") or data.get("body") or data.get("title") or json.dumps(data)
+        text = _merge_title_and_text(
+            data.get("title"),
+            data.get("text") or data.get("content") or data.get("body"),
+        ) or json.dumps(data)
         return [{"text": text, "source_file": path.name, **data}]
 
     return []
 
 
-def read_csv(path: Path) -> list[dict]:
-    rows = []
+def read_csv(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         reader = csv.DictReader(f)
         for i, row in enumerate(reader):
-            text = row.get("text") or row.get("content") or row.get("body") or row.get("title", "")
+            text = _merge_title_and_text(
+                row.get("title"),
+                row.get("text") or row.get("content") or row.get("body"),
+            )
             if row.get("summary"):
                 text = f"{text}\n{row['summary']}"
-            rows.append({
-                "text": text,
-                "source_file": path.name,
-                "row_id": i,
-                **row
-            })
+            rows.append(
+                {
+                    "text": text,
+                    "source_file": path.name,
+                    "row_id": i,
+                    **row,
+                }
+            )
     return rows
 
 
-def parse_file(path: str) -> list[dict]:
+def parse_file(path: str) -> list[dict[str, Any]]:
     p = Path(path)
     suffix = p.suffix.lower()
 
@@ -118,7 +145,7 @@ def _get_collection():
     return collection
 
 
-def _delete_existing_file_docs(collection, source_file: str):
+def _delete_existing_file_docs(collection, source_file: str) -> None:
     try:
         res = collection.get(where={"source_file": source_file})
         ids = res.get("ids", [])
@@ -128,7 +155,26 @@ def _delete_existing_file_docs(collection, source_file: str):
         pass
 
 
-def index_one_file(path: str) -> dict:
+def _add_scalar_metadata(meta: dict[str, Any], key: str, value: Any) -> None:
+    if value is None:
+        return
+
+    if isinstance(value, (str, int, float, bool)):
+        meta[key] = value
+        return
+
+    if key == "tickers" and isinstance(value, list):
+        tickers = [
+            str(item).strip().upper()
+            for item in value
+            if isinstance(item, (str, int, float)) and str(item).strip()
+        ]
+        if tickers:
+            meta["primary_ticker"] = tickers[0]
+            meta["tickers_csv"] = ",".join(tickers)
+
+
+def index_one_file(path: str) -> dict[str, Any]:
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"File not found: {path}")
@@ -139,9 +185,9 @@ def index_one_file(path: str) -> dict:
 
     _delete_existing_file_docs(collection, p.name)
 
-    all_docs = []
-    all_ids = []
-    all_metas = []
+    all_docs: list[str] = []
+    all_ids: list[str] = []
+    all_metas: list[dict[str, Any]] = []
 
     for row_idx, row in enumerate(rows):
         text = row.get("text", "")
@@ -156,8 +202,9 @@ def index_one_file(path: str) -> dict:
             }
 
             for k, v in row.items():
-                if k != "text" and isinstance(v, (str, int, float, bool)):
-                    meta[k] = v
+                if k == "text":
+                    continue
+                _add_scalar_metadata(meta, k, v)
 
             all_docs.append(chunk)
             all_ids.append(str(uuid.uuid4()))
