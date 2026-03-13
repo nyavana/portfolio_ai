@@ -4,15 +4,15 @@
 
 [![Docker Image](https://img.shields.io/docker/v/ggdxwz/portfolio-ai/latest?label=image)](https://hub.docker.com/r/ggdxwz/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
 
-这是一个基于 RAG 的金融投资组合助手，使用 FastAPI、ChromaDB 和兼容 OpenAI 的 LLM 构建，并提供采用 “Dark Terminal Editorial” 风格的 React 前端。
+这是一个基于 RAG 的金融投资组合助手。后端用 FastAPI、ChromaDB 和兼容 OpenAI 的 LLM，前端是一个深色终端风格的 React 应用。
 
 ![实时用例演示](../images/Portfolio_AI_Front.png)
 
-该项目展示了一个用于投资组合分析、风险审查和交互式金融问答的金融 AI 助手。
+它主要做三件事：看投资组合、查风险、结合 filings 和新闻回答问题。
 
 ## 概览
 
-该应用结合了 React 前端、FastAPI 后端、基于 ChromaDB 的 filings 与新闻检索，以及兼容 OpenAI 的 LLM API。
+应用结构不复杂：React 前端负责界面，FastAPI 后端负责接口，ChromaDB 检索 filings 和新闻，再把上下文交给兼容 OpenAI 的 LLM。
 
 - 前端：Dashboard、Risk Flags、News、Chat、Upload 和 Status 页面
 - 后端：投资组合摘要、风险标记分析、新闻影响分析、上传和统一问答
@@ -21,11 +21,11 @@
 
 ### 产品视图
 
-<p align="center"><img src="../images/Portfolio%20AI%20Summery.png" alt="项目摘要" width="100%"><img src="../images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="投资组合总览与风险分析" width="100%"><img src="../images/Portfolio%20AI%20Q%26A.png" alt="金融问答" width="100%"></p>
+![产品视图](../images/portfolio_combined_vertical_reordered.png)
 
 ## 快速开始
 
-Docker 是运行该项目的首选方式。
+如果只是想先跑起来，直接用 Docker 最省事。
 
 ### 方式 1：本地构建
 
@@ -51,12 +51,12 @@ docker run -p 8000:8000 \
   ggdxwz/portfolio-ai:latest
 ```
 
-应用可通过以下地址访问：
+容器启动后，可以打开：
 
 - `http://localhost:8000`：前端 UI
 - `http://localhost:8000/docs`：API 文档
 
-如果希望在容器重启后保留 ChromaDB 数据，请挂载 `DATA/`：
+如果想在容器重启后保留 ChromaDB 数据，把 `DATA/` 挂出来：
 
 ```bash
 docker run -p 8000:8000 \
@@ -65,7 +65,7 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
-如需查看 Docker 相关的更多细节，包括在宿主机上使用 Ollama 和已发布镜像标签，请参见 [Docker 部署](#docker-部署)。
+想看更完整的 Docker 说明，包括宿主机上的 Ollama 用法和已发布镜像标签，可以直接跳到 [Docker 部署](#docker-部署)。
 
 ## 前置要求
 
@@ -82,7 +82,7 @@ docker run -p 8000:8000 \
 
 ## 本地开发设置
 
-如果你希望在开发时分别运行后端和前端，请使用这一方式。
+如果你想把前后端分开跑开发环境，按下面这套流程来就行。
 
 ### 1. 创建虚拟环境
 
@@ -112,7 +112,7 @@ cp .env.example .env.local
 # 编辑 .env.local，填入 LMDEPLOY_API_KEY
 ```
 
-`.env.local` 控制以下配置：
+运行时配置都在 `.env.local` 里：
 
 | 变量 | 默认值 | 用途 |
 |---|---|---|
@@ -125,14 +125,14 @@ cp .env.example .env.local
 
 ### 4. 初始化 filings 向量数据库
 
-`chroma_news` 已预先填充。`chroma_filings` 需要通过 mock 文件初始化：
+`chroma_news` 已经预填好了。`chroma_filings` 还得先用 mock 文件初始化：
 
 ```bash
 bash scripts/bootstrap_filings.sh
 ```
 
-这会索引 `DATA/uploads/filings/filing_apple_q_mock.txt` 和 `filing_nvidia_q_mock.txt`。
-`all-MiniLM-L6-v2` 嵌入模型（约 22 MB）会在首次运行时下载，并缓存到 `HF_HOME`。
+这一步会把 `DATA/uploads/filings/filing_apple_q_mock.txt` 和 `filing_nvidia_q_mock.txt` 索引进去。
+`all-MiniLM-L6-v2` 这个嵌入模型（约 22 MB）会在第一次运行时下载，随后缓存到 `HF_HOME`。
 
 ### 5. 启动后端
 
@@ -150,8 +150,8 @@ npm install
 npm run dev
 ```
 
-前端运行在 `http://localhost:5173`，并要求后端运行在 `8000` 端口。
-你可以通过 `frontend/.env.local` 中的 `VITE_API_BASE_URL` 覆盖 API 地址。
+前端默认跑在 `http://localhost:5173`，并假定后端在 `8000` 端口。
+如果地址不一样，可以在 `frontend/.env.local` 里改 `VITE_API_BASE_URL`。
 
 ### 可选：使用 Ollama 替代托管 API
 
@@ -165,15 +165,15 @@ ollama pull llama3.2:3b
 
 ### OpenAI SDK 兼容性
 
-项目使用 `openai==2.26.0`。与 GPT-4 相比，较新的前沿模型（GPT-5 及以上）有两个参数发生了变化：
+项目使用 `openai==2.26.0`。如果你接的是较新的模型，比如 GPT-5 及以上，有两个参数和 GPT-4 时代不一样：
 
 | 参数 | 旧版（GPT-4） | 新版（GPT-5+） |
 |---|---|---|
 | Token 上限 | `max_tokens` | `max_completion_tokens` |
 | 采样参数 | `temperature=0.2` | 不支持，需完全省略 |
 
-`core/lmdeploy_client.py` 已经使用 `max_completion_tokens` 并省略了 `temperature`。
-通过 LMDeploy 部署的 HPC LLaMA 不受影响，因为它会忽略未知参数。
+`core/lmdeploy_client.py` 已经改成了 `max_completion_tokens`，也没有再传 `temperature`。
+如果你用的是通过 LMDeploy 部署的 HPC LLaMA，这里不用额外处理，它会忽略未知参数。
 
 ## 验证
 
@@ -195,15 +195,15 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 
 ## API 参考
 
-完整的请求/响应 schema 和 TypeScript 类型见 `../api/portfolio_ai_frontend_mock_api.md`。
+完整的请求与响应 schema，以及对应的 TypeScript 类型，见 `../api/portfolio_ai_frontend_mock_api.md`。
 
 ### CORS
 
-后端允许来自 `http://localhost:5173` 和 `http://127.0.0.1:5173` 的跨域请求，这一配置位于 `app/api_server.py` 的 `CORSMiddleware` 中。如果部署到其他前端主机，请扩展 `allow_origins`。
+后端默认只放行 `http://localhost:5173` 和 `http://127.0.0.1:5173` 这两个来源。配置在 `app/api_server.py` 的 `CORSMiddleware` 里；如果前端不跑在这两个地址，记得改 `allow_origins`。
 
 ### 按请求覆盖 LLM 的请求头
 
-每个依赖 LLM 的端点（`/portfolio_summary`、`/risk_flags`、`/news_impact`、`/ask`）都会读取三个可选请求头，并优先使用它们而不是服务端环境变量：
+每个依赖 LLM 的端点（`/portfolio_summary`、`/risk_flags`、`/news_impact`、`/ask`）都支持三个可选请求头，用来临时覆盖服务端环境变量：
 
 | 请求头 | 覆盖项 | 示例 |
 |---|---|---|
@@ -211,7 +211,7 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 | `X-Api-Base-Url` | `LMDEPLOY_BASE_URL` | `https://api.openai.com/v1` |
 | `X-Api-Model` | `LMDEPLOY_MODEL` | `gpt-4o` |
 
-这也是 UI 中设置弹窗在无需重启服务器的情况下向后端注入用户配置 key 的方式。如果某个请求头缺失，则继续使用服务端默认值。
+UI 里的设置弹窗就是靠这几个请求头把用户的 key 传给后端的，所以不用重启服务。如果某个请求头没传，就继续用服务端默认值。
 
 ### 端点快速参考
 
@@ -299,7 +299,7 @@ DATA/
 
 ## Docker 部署
 
-仓库包含一个多阶段 `Dockerfile`，可在单个容器中构建 React 前端并运行 FastAPI 后端。无需额外的 Web 服务器。FastAPI 会直接从 `frontend/dist/` 提供编译后的前端文件。
+仓库里带了一个多阶段 `Dockerfile`。它会在同一个容器里把 React 前端构建好，再跑 FastAPI 后端，不用另外再配 Web 服务器。编译后的前端文件直接由 FastAPI 从 `frontend/dist/` 提供。
 
 ### 构建镜像
 
@@ -317,7 +317,7 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
-随后可通过 `http://localhost:8000` 访问前端 UI，通过 `http://localhost:8000/docs` 访问 API 文档。
+启动后，前端在 `http://localhost:8000`，API 文档在 `http://localhost:8000/docs`。
 
 ### 工作原理
 
@@ -326,13 +326,13 @@ docker run -p 8000:8000 \
 | `frontend-builder` | `node:20-alpine` | 以 `VITE_API_BASE_URL=""` 执行 `npm ci && npm run build` |
 | final | `python:3.12-slim` | 安装 Python 依赖，复制后端和 `frontend/dist/`，启动 uvicorn |
 
-在构建时将 `VITE_API_BASE_URL=""` 设为空字符串后，React 应用会调用相对路径，例如 `/portfolio_summary`。浏览器会将这些请求解析到容器自身端口，从而避免 CORS 和跨域问题。
+构建时把 `VITE_API_BASE_URL=""` 设成空字符串后，React 应用会去请求 `/portfolio_summary` 这类相对路径。浏览器会把这些请求解析到容器自己的端口，因此不用再绕 CORS。
 
-> **注意：** 容器内的 `/` 根端点被重命名为 `/api/status`，以避免与 SPA 的 catch-all 路由冲突；后者需要为所有未匹配路径返回 `index.html`，这是 React Router 所必需的。
+> **注意：** 在容器内，`/` 根端点被重命名为 `/api/status`，这样就不会和 SPA 的 catch-all 路由冲突；后者会为未匹配路径返回 `index.html`。
 
 ### Docker 环境变量
 
-可通过 `-e` 参数或 `.env` 文件（例如 `--env-file .env.local`）传入：
+这些变量可以用 `-e` 传，也可以放进 `.env` 文件，比如 `--env-file .env.local`：
 
 | 变量 | 说明 |
 |---|---|
@@ -352,7 +352,7 @@ docker run -p 8000:8000 \
 
 ### 数据持久化
 
-ChromaDB 数据库存放在容器内的 `/app/DATA/`。如需跨重启保留数据，请挂载卷：
+ChromaDB 数据库存放在容器内的 `/app/DATA/`。想把数据留到下次重启，就挂载卷：
 
 ```bash
 docker run -p 8000:8000 \
@@ -363,7 +363,7 @@ docker run -p 8000:8000 \
 
 ### 从 Docker Hub 拉取镜像
 
-通过 GitHub Actions，每次推送到 `main` 时都会自动发布预构建镜像。你无需克隆仓库，也无需在远程服务器上本地构建：
+GitHub Actions 会在每次推送到 `main` 时自动发布预构建镜像。这样你不用克隆仓库，也不用在远程机器上自己构建：
 
 ```bash
 docker pull ggdxwz/portfolio-ai:latest
@@ -384,17 +384,17 @@ docker run -p 8000:8000 \
   ggdxwz/portfolio-ai:latest
 ```
 
-每次推送到 `main` 还会基于 Git commit SHA 生成一个固定标签，例如 `ggdxwz/portfolio-ai:abc1234`，便于可复现部署。
+每次推送到 `main` 还会顺手生成一个基于 Git commit SHA 的固定标签，比如 `ggdxwz/portfolio-ai:abc1234`，方便做可复现部署。
 
 ## HPC 部署（SLURM）
 
-GPU 集群部署请使用 `api_server.sbatch`。该 sbatch 脚本会导出所有必需的环境变量（`PROJECT_DIR`、`LMDEPLOY_*`），从而覆盖 `app/config.py` 中的本地默认值。无需修改 sbatch 文件。
+如果要部署到 GPU 集群，直接用 `api_server.sbatch`。这个脚本会导出需要的环境变量（`PROJECT_DIR`、`LMDEPLOY_*`），覆盖 `app/config.py` 里的本地默认值，一般不用再改 sbatch 文件。
 
 ```bash
 sbatch api_server.sbatch
 ```
 
-该 sbatch 脚本会：
+这个 sbatch 脚本会按顺序做五件事：
 
 1. 设置 conda 环境（`lmdeploy_env`）
 2. 在 `23333` 端口启动 LMDeploy 推理服务
@@ -402,7 +402,7 @@ sbatch api_server.sbatch
 4. 在 `8000` 端口启动 FastAPI
 5. 在 API 进程退出前保持作业存活
 
-通过本地机器上的 SSH 隧道访问：
+本地机器可以通过 SSH 隧道访问：
 
 ```bash
 ssh -L 8000:localhost:8000 <hpc-host>
@@ -410,7 +410,7 @@ ssh -L 8000:localhost:8000 <hpc-host>
 
 ## ChromaDB 说明
 
-`chroma_news` SQLite 数据库是使用较旧版本的 chromadb 创建的。如果升级后出现 `KeyError: '_type'`，请修补 `config_json_str` 列：
+`chroma_news` 这个 SQLite 数据库是用较旧版本的 chromadb 创建的。如果升级后碰到 `KeyError: '_type'`，补一下 `config_json_str` 列：
 
 ```python
 import chromadb
@@ -420,4 +420,4 @@ cfg = CollectionConfigurationInternal().to_json_str()
 # 然后执行：UPDATE collections SET config_json_str = '<cfg>' WHERE name = 'news';
 ```
 
-项目固定使用 `chromadb==0.6.3`。现有 SQLite schema（migration level 10）与 chromadb 1.x 的重写版本不兼容。
+项目固定用 `chromadb==0.6.3`。现有的 SQLite schema（migration level 10）不能直接拿去给 chromadb 1.x 用。

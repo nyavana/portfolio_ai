@@ -4,28 +4,28 @@
 
 [![Docker Image](https://img.shields.io/docker/v/ggdxwz/portfolio-ai/latest?label=image)](https://hub.docker.com/r/ggdxwz/portfolio-ai) [![Build and push Docker image](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/nyavana/portfolio_ai/actions/workflows/docker-publish.yml) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](https://www.python.org/downloads/release/python-3120/) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/nyavana/portfolio_ai)
 
-A RAG-based financial portfolio assistant built with FastAPI, ChromaDB, and an OpenAI-compatible LLM, with a React frontend in a "Dark Terminal Editorial" style.
+A RAG-based financial portfolio assistant built with FastAPI, ChromaDB, and an OpenAI-compatible LLM. The frontend is a React app with a dark terminal-style UI.
 
 ![Live use cases](docs/images/Portfolio_AI_Front.png)
 
-The project presents a financial AI assistant for portfolio analysis, risk review, and interactive financial Q&A.
+The project is meant for portfolio analysis, risk review, and financial Q&A grounded in filings and news.
 
 ## Overview
 
-The application combines a React frontend, a FastAPI backend, ChromaDB-backed retrieval for filings and news, and an OpenAI-compatible LLM API.
+At a high level, the app pairs a React frontend with a FastAPI backend, then uses ChromaDB to retrieve filings and news before sending context to an OpenAI-compatible LLM.
 
 - Frontend: Dashboard, Risk Flags, News, Chat, Upload, and Status views
 - Backend: portfolio summary, risk flag analysis, news impact analysis, uploads, and unified Q&A
 - Retrieval: `chroma_news` for news and `chroma_filings` for SEC-style filing content
 - Deployment options: Docker, local development, and SLURM-based HPC deployment
 
-### Product Views
+## Product Views
 
-<p align="center"><img src="docs/images/Portfolio%20AI%20Summery.png" alt="Project summary" width="100%"><img src="docs/images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="Portfolio overview and risk analysis" width="100%"><img src="docs/images/Portfolio%20AI%20Q%26A.png" alt="Financial Q&A" width="100%"></p>
+![Project views](docs/images/portfolio_combined_vertical_reordered.png)
 
 ## Quick Start
 
-Docker is the preferred way to run the project.
+If you just want to run it, Docker is the quickest way.
 
 ### Option 1: Build locally
 
@@ -51,7 +51,7 @@ docker run -p 8000:8000 \
   ggdxwz/portfolio-ai:latest
 ```
 
-The app is available at:
+After the container starts, open:
 
 - `http://localhost:8000` for the frontend UI
 - `http://localhost:8000/docs` for the API docs
@@ -65,7 +65,7 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
-For Docker-specific details, including Ollama on the host and published image tags, see [Docker Deployment](#docker-deployment).
+For more Docker details, including Ollama on the host and published image tags, see [Docker Deployment](#docker-deployment).
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ For Docker-specific details, including Ollama on the host and published image ta
 
 ## Local Development Setup
 
-Use this path if you want to run the backend and frontend separately during development.
+Use this setup if you want the backend and frontend running separately during development.
 
 ### 1. Create the virtual environment
 
@@ -109,10 +109,10 @@ python3.12 -m venv .venv
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local — fill in LMDEPLOY_API_KEY
+# Edit .env.local and fill in LMDEPLOY_API_KEY
 ```
 
-`.env.local` controls:
+`.env.local` controls the runtime configuration:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -125,14 +125,14 @@ cp .env.example .env.local
 
 ### 4. Bootstrap the filings vector DB
 
-`chroma_news` is pre-populated. `chroma_filings` must be bootstrapped from the mock files:
+`chroma_news` already has data. `chroma_filings` still needs to be bootstrapped from the mock files:
 
 ```bash
 bash scripts/bootstrap_filings.sh
 ```
 
 This indexes `DATA/uploads/filings/filing_apple_q_mock.txt` and `filing_nvidia_q_mock.txt`.
-The `all-MiniLM-L6-v2` embedding model (~22 MB) is downloaded on first run and cached in `HF_HOME`.
+The `all-MiniLM-L6-v2` embedding model (~22 MB) is downloaded the first time and cached in `HF_HOME`.
 
 ### 5. Start the backend
 
@@ -140,7 +140,7 @@ The `all-MiniLM-L6-v2` embedding model (~22 MB) is downloaded on first run and c
 bash run_api.sh
 ```
 
-The API docs are available at `http://127.0.0.1:8000/docs`.
+API docs are available at `http://127.0.0.1:8000/docs`.
 
 ### 6. Start the frontend
 
@@ -150,7 +150,7 @@ npm install
 npm run dev
 ```
 
-The frontend runs at `http://localhost:5173` and requires the backend on port `8000`.
+The frontend runs at `http://localhost:5173` and expects the backend on port `8000`.
 You can override the API URL with `VITE_API_BASE_URL` in `frontend/.env.local`.
 
 ### Optional: use Ollama instead of a hosted API
@@ -165,14 +165,14 @@ ollama pull llama3.2:3b
 
 ### OpenAI SDK compatibility
 
-The project uses `openai==2.26.0`. Two parameters changed for newer frontier models (GPT-5 class and above) compared to GPT-4:
+The project uses `openai==2.26.0`. For newer frontier models (GPT-5 class and above), two parameters differ from GPT-4:
 
 | Parameter | Old (GPT-4) | New (GPT-5+) |
 |---|---|---|
 | Token limit | `max_tokens` | `max_completion_tokens` |
 | Sampling | `temperature=0.2` | not supported — omit entirely |
 
-`core/lmdeploy_client.py` already uses `max_completion_tokens` and omits `temperature`.
+`core/lmdeploy_client.py` already uses `max_completion_tokens` and leaves out `temperature`.
 The HPC LLaMA deployment via LMDeploy is unaffected because it ignores unknown parameters.
 
 ## Verification
@@ -195,15 +195,15 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 
 ## API Reference
 
-See `docs/api/portfolio_ai_frontend_mock_api.md` for full request/response schemas and TypeScript types.
+See `docs/api/portfolio_ai_frontend_mock_api.md` for full request and response schemas, plus the matching TypeScript types.
 
 ### CORS
 
-The backend allows cross-origin requests from `http://localhost:5173` and `http://127.0.0.1:5173`, configured in `app/api_server.py` via `CORSMiddleware`. Extend `allow_origins` when deploying to a different frontend host.
+The backend allows cross-origin requests from `http://localhost:5173` and `http://127.0.0.1:5173`, configured in `app/api_server.py` through `CORSMiddleware`. If you deploy the frontend somewhere else, update `allow_origins`.
 
 ### Per-request LLM override headers
 
-Every LLM-backed endpoint (`/portfolio_summary`, `/risk_flags`, `/news_impact`, `/ask`) reads three optional request headers and uses them in place of the server-side environment variables:
+Every LLM-backed endpoint (`/portfolio_summary`, `/risk_flags`, `/news_impact`, `/ask`) can read three optional request headers and use them instead of the server-side environment variables:
 
 | Header | Overrides | Example |
 |---|---|---|
@@ -211,7 +211,7 @@ Every LLM-backed endpoint (`/portfolio_summary`, `/risk_flags`, `/news_impact`, 
 | `X-Api-Base-Url` | `LMDEPLOY_BASE_URL` | `https://api.openai.com/v1` |
 | `X-Api-Model` | `LMDEPLOY_MODEL` | `gpt-4o` |
 
-This is how the Settings modal in the UI injects the key configured by the user without a server restart. If a header is absent, the server-side default is used.
+This is how the Settings modal in the UI passes the user's key without requiring a server restart. If a header is missing, the server-side default stays in effect.
 
 ### Endpoint quick reference
 
@@ -299,7 +299,7 @@ DATA/
 
 ## Docker Deployment
 
-The repository includes a multi-stage `Dockerfile` that builds the React frontend and runs the FastAPI backend in a single container. No separate web server is required. FastAPI serves the compiled frontend from `frontend/dist/`.
+The repository includes a multi-stage `Dockerfile` that builds the React frontend and runs the FastAPI backend in one container. There is no separate web server. FastAPI serves the compiled frontend from `frontend/dist/`.
 
 ### Build the image
 
@@ -317,7 +317,7 @@ docker run -p 8000:8000 \
   portfolio-ai
 ```
 
-The app is then available at `http://localhost:8000` for the frontend UI and `http://localhost:8000/docs` for the API docs.
+After that, the frontend is available at `http://localhost:8000` and the API docs are at `http://localhost:8000/docs`.
 
 ### How it works
 
@@ -326,13 +326,13 @@ The app is then available at `http://localhost:8000` for the frontend UI and `ht
 | `frontend-builder` | `node:20-alpine` | `npm ci && npm run build` with `VITE_API_BASE_URL=""` |
 | final | `python:3.12-slim` | installs Python deps, copies backend + `frontend/dist/`, starts uvicorn |
 
-Setting `VITE_API_BASE_URL=""` at build time makes the React app call relative paths such as `/portfolio_summary`, so the browser resolves them against the container's own port. That avoids CORS and cross-origin issues.
+Setting `VITE_API_BASE_URL=""` at build time makes the React app call relative paths such as `/portfolio_summary`, so the browser resolves them against the container's own port. That avoids CORS trouble.
 
-> **Note:** The `/` root endpoint is renamed to `/api/status` inside the container to avoid conflicting with the SPA catch-all route that returns `index.html` for all unmatched paths, which is required for React Router.
+> **Note:** Inside the container, the `/` root endpoint is renamed to `/api/status` so it does not conflict with the SPA catch-all route that returns `index.html` for unmatched paths.
 
 ### Docker environment variables
 
-Pass them with `-e` flags or a `.env` file such as `--env-file .env.local`:
+Pass these with `-e` flags or a `.env` file such as `--env-file .env.local`:
 
 | Variable | Description |
 |---|---|
@@ -352,7 +352,7 @@ docker run -p 8000:8000 \
 
 ### Data persistence
 
-ChromaDB databases live inside the container at `/app/DATA/`. To persist them across restarts, mount a volume:
+ChromaDB databases live inside the container at `/app/DATA/`. If you want them to survive restarts, mount a volume:
 
 ```bash
 docker run -p 8000:8000 \
@@ -363,7 +363,7 @@ docker run -p 8000:8000 \
 
 ### Pull from Docker Hub
 
-A pre-built image is published automatically on every push to `main` via GitHub Actions. You do not need to clone the repo or build locally on remote servers:
+A pre-built image is published automatically on every push to `main` through GitHub Actions. You do not need to clone the repo or build it yourself on a remote server:
 
 ```bash
 docker pull ggdxwz/portfolio-ai:latest
@@ -384,17 +384,17 @@ docker run -p 8000:8000 \
   ggdxwz/portfolio-ai:latest
 ```
 
-Each push to `main` also creates a pinned tag using the Git commit SHA, for example `ggdxwz/portfolio-ai:abc1234`, for reproducible deployments.
+Each push to `main` also creates a pinned tag based on the Git commit SHA, for example `ggdxwz/portfolio-ai:abc1234`, if you want a reproducible deployment target.
 
 ## HPC Deployment (SLURM)
 
-Use `api_server.sbatch` for GPU cluster deployment. The sbatch script exports all required environment variables (`PROJECT_DIR`, `LMDEPLOY_*`) that override the local defaults in `app/config.py`. No changes to the sbatch file are needed.
+Use `api_server.sbatch` for GPU cluster deployment. The script exports the required environment variables (`PROJECT_DIR`, `LMDEPLOY_*`) and overrides the local defaults in `app/config.py`. You should not need to modify the sbatch file.
 
 ```bash
 sbatch api_server.sbatch
 ```
 
-The sbatch script:
+The sbatch script does five things:
 
 1. Sets up conda env (`lmdeploy_env`)
 2. Starts LMDeploy inference server on port `23333`
@@ -402,7 +402,7 @@ The sbatch script:
 4. Starts FastAPI on port `8000`
 5. Keeps the job alive until the API process exits
 
-Access it from your local machine through an SSH tunnel:
+You can reach it from your local machine through an SSH tunnel:
 
 ```bash
 ssh -L 8000:localhost:8000 <hpc-host>
@@ -410,7 +410,7 @@ ssh -L 8000:localhost:8000 <hpc-host>
 
 ## ChromaDB Notes
 
-The `chroma_news` SQLite database was created with an older version of chromadb. When upgrading, patch the `config_json_str` column if you see `KeyError: '_type'`:
+The `chroma_news` SQLite database was created with an older version of chromadb. If you upgrade and hit `KeyError: '_type'`, patch the `config_json_str` column:
 
 ```python
 import chromadb
@@ -420,4 +420,4 @@ cfg = CollectionConfigurationInternal().to_json_str()
 # Then: UPDATE collections SET config_json_str = '<cfg>' WHERE name = 'news';
 ```
 
-The project is pinned to `chromadb==0.6.3`. The existing SQLite schema (migration level 10) is incompatible with the chromadb 1.x rewrite.
+The project is pinned to `chromadb==0.6.3`. The existing SQLite schema (migration level 10) does not work with the chromadb 1.x rewrite.
