@@ -21,15 +21,7 @@
 
 ### 产品视图
 
-下方截图展示了后端所支撑的核心 UI 流程。
-
-![投资组合总览与风险分析](../images/Portfolio%20AI%20Overview%20and%20Risk.png)
-
-Dashboard 将投资组合摘要数据、基于规则的风险标记，以及面向示例持仓生成的 LLM 叙述整合在一起。
-
-![投资组合摘要](../images/Portfolio%20AI%20Summery.png)
-
-该视图重点展示投资组合总价值、持仓、行业敞口，以及助手返回的结构化摘要。
+<p align="center"><img src="../images/Portfolio%20AI%20Summery.png" alt="项目摘要" width="33.3333%"><img src="../images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="投资组合总览与风险分析" width="33.3333%"><img src="../images/Portfolio%20AI%20Q%26A.png" alt="金融问答" width="33.3333%"></p>
 
 ## 快速开始
 
@@ -235,14 +227,6 @@ curl -s -X POST http://127.0.0.1:8000/ask \
 | `POST` | `/ask` | 统一问答，路由到上述能力或 RAG（Financial Q&A） |
 | `POST` | `/upload/filing` | 上传并索引 filing 文档 |
 | `POST` | `/upload/news` | 上传并索引 news 文档 |
-
-### Financial Q&A（RAG）
-
-同一个后端也支撑基于 filing 的交互式问答流程。在 Chat 视图中，用户可以提出一个具体问题，后端会将其路由到 RAG 流水线，答案则基于检索出的文档上下文生成。
-
-![金融问答](../images/Portfolio%20AI%20Q%26A.png)
-
-该界面展示了由 `/ask` 路由和 filings/news 检索流水线支撑的问题回答流程。
 
 ## 架构
 

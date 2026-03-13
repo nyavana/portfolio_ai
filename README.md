@@ -21,15 +21,7 @@ The application combines a React frontend, a FastAPI backend, ChromaDB-backed re
 
 ### Product Views
 
-The screenshots below show the core UI flows the backend powers.
-
-![Portfolio overview and risk analysis](docs/images/Portfolio%20AI%20Overview%20and%20Risk.png)
-
-The dashboard combines portfolio summary data, rule-based risk flags, and an LLM-generated narrative for the demo holdings.
-
-![Portfolio summary](docs/images/Portfolio%20AI%20Summery.png)
-
-This view highlights total portfolio value, holdings, sector exposure, and the structured summary returned by the assistant.
+<p align="center"><img src="docs/images/Portfolio%20AI%20Summery.png" alt="Project summary" width="33.3333%"><img src="docs/images/Portfolio%20AI%20Overview%20and%20Risk.png" alt="Portfolio overview and risk analysis" width="33.3333%"><img src="docs/images/Portfolio%20AI%20Q%26A.png" alt="Financial Q&A" width="33.3333%"></p>
 
 ## Quick Start
 
@@ -235,14 +227,6 @@ This is how the Settings modal in the UI injects the key configured by the user 
 | `POST` | `/ask` | Unified QA — routes to above or RAG (Financial Q&A) |
 | `POST` | `/upload/filing` | Upload and index a filing document |
 | `POST` | `/upload/news` | Upload and index a news document |
-
-### Financial Q&A (RAG)
-
-The same backend also powers an interactive Q&A workflow for filing-driven questions. In the Chat view, a user can ask a specific question, the backend routes it through the RAG pipeline, and the answer is grounded in retrieved document context.
-
-![Financial Q&A](docs/images/Portfolio%20AI%20Q%26A.png)
-
-This screen shows the question-answer flow backed by the `/ask` route and the filings/news retrieval pipeline.
 
 ## Architecture
 
