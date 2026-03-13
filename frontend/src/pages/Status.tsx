@@ -1,11 +1,11 @@
 import { useApi } from '../hooks/useApi';
-import { getRoot, getHealth } from '../api/system';
+import { getStatus, getHealth } from '../api/system';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorBanner } from '../components/common/ErrorBanner';
 import styles from './Pages.module.css';
 
 export function Status() {
-  const root = useApi(getRoot);
+  const status = useApi(getStatus);
   const health = useApi(getHealth);
 
   return (
@@ -44,17 +44,17 @@ export function Status() {
       {/* Routes */}
       <div className="card animate-in stagger-2">
         <span className="label">Available Routes</span>
-        {root.loading ? (
+        {status.loading ? (
           <LoadingSkeleton lines={4} />
-        ) : root.error ? (
-          <ErrorBanner message={root.error} onRetry={root.refetch} />
-        ) : root.data ? (
+        ) : status.error ? (
+          <ErrorBanner message={status.error} onRetry={status.refetch} />
+        ) : status.data ? (
           <>
             <p className="text-secondary" style={{ margin: 'var(--space-sm) 0 var(--space-md)' }}>
-              {root.data.message}
+              {status.data.message}
             </p>
             <div className={styles.routeList}>
-              {root.data.routes.map((route) => (
+              {status.data.routes.map((route) => (
                 <code key={route} className={styles.routeItem}>
                   {route}
                 </code>

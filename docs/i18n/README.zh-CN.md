@@ -217,7 +217,7 @@ UI 里的设置弹窗就是靠这几个请求头把用户的 key 传给后端的
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| `GET` | `/api/status` | 服务状态和路由列表（Docker）/ 开发环境下为 `/` |
+| `GET` | `/api/status` | 服务状态和路由列表 |
 | `GET` | `/health` | LLM 连通性检查 |
 | `GET` | `/config/llm` | 当前 LLM 配置（带掩码的 key 提示） |
 | `POST` | `/config/llm` | 在运行时替换服务端 LLM 配置 |
@@ -326,9 +326,9 @@ docker run -p 8000:8000 \
 | `frontend-builder` | `node:20-alpine` | 以 `VITE_API_BASE_URL=""` 执行 `npm ci && npm run build` |
 | final | `python:3.12-slim` | 安装 Python 依赖，复制后端和 `frontend/dist/`，启动 uvicorn |
 
-构建时把 `VITE_API_BASE_URL=""` 设成空字符串后，React 应用会去请求 `/portfolio_summary` 这类相对路径。浏览器会把这些请求解析到容器自己的端口，因此不用再绕 CORS。
+构建时把 `VITE_API_BASE_URL=""` 设成空字符串后，React 应用会去请求 `/portfolio_summary`、`/api/status` 这类相对路径。浏览器会把这些请求解析到容器自己的端口，因此不用再绕 CORS。
 
-> **注意：** 在容器内，`/` 根端点被重命名为 `/api/status`，这样就不会和 SPA 的 catch-all 路由冲突；后者会为未匹配路径返回 `index.html`。
+> **注意：** `/api/status` 是开发环境和 Docker 环境统一使用的状态接口。构建后的前端场景里，`/` 保留给 SPA 入口页面。
 
 ### Docker 环境变量
 

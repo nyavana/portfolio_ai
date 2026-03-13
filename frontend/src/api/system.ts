@@ -1,5 +1,5 @@
 import { apiGet } from './client';
-import type { RootResponse, HealthResponse } from '../types/api';
+import type { StatusResponse, HealthResponse } from '../types/api';
 
-export const getRoot = () => apiGet<RootResponse>('/');
+export const getStatus = () => apiGet<StatusResponse>('/api/status');
 export const getHealth = () => apiGet<HealthResponse>('/health');

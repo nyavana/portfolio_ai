@@ -11,7 +11,7 @@ export interface RequestState<T> {
 }
 
 // ── System ──
-export interface RootResponse {
+export interface StatusResponse {
   readonly status: string;
   readonly message: string;
   readonly routes: readonly string[];

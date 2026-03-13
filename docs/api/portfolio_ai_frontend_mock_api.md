@@ -55,7 +55,7 @@ GET /openapi.json
 
 ### 基础接口
 
-- `GET /`
+- `GET /api/status`
 - `GET /health`
 
 ### 配置接口
@@ -107,12 +107,12 @@ GET /openapi.json
 
 ## 5. 基础接口定义
 
-## 5.1 `GET /api/status` (容器) / `GET /` (开发)
+## 5.1 `GET /api/status`
 
 ### 用途
 返回服务状态和可用路由列表。
 
-> **注意：** Docker 容器内路由为 `/api/status`（避免与 SPA catch-all 冲突）。开发环境仍为 `/`。
+> **注意：** `/api/status` 是开发环境和 Docker 环境统一使用的状态接口。`/` 在构建后的前端场景下保留给 SPA 入口页面。
 
 ### 请求
 
@@ -127,7 +127,9 @@ GET /api/status
   "status": "ok",
   "message": "Portfolio AI Assistant is running",
   "routes": [
+    "/api/status",
     "/health",
+    "/config/llm",
     "/portfolio_summary",
     "/risk_flags",
     "/news_impact",
@@ -859,4 +861,3 @@ interface UploadState {
 - Filing / News 上传页
 
 后端后续若新增接口，建议继续沿用相同风格扩展。
-

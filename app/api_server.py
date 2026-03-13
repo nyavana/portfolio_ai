@@ -51,12 +51,14 @@ def _get_llm_from_request(request: Request) -> LMDeployClient:
 
 
 @app.get("/api/status")
-def root():
+def api_status():
     return {
         "status": "ok",
         "message": "Portfolio AI Assistant is running",
         "routes": [
+            "/api/status",
             "/health",
+            "/config/llm",
             "/portfolio_summary",
             "/risk_flags",
             "/news_impact",

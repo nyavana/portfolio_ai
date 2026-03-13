@@ -217,7 +217,7 @@ This is how the Settings modal in the UI passes the user's key without requiring
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/status` | Service status and route list (Docker) / `/` in dev |
+| `GET` | `/api/status` | Service status and route list |
 | `GET` | `/health` | LLM connectivity check |
 | `GET` | `/config/llm` | Current LLM config (masked key hint) |
 | `POST` | `/config/llm` | Replace server-side LLM config at runtime |
@@ -326,9 +326,9 @@ After that, the frontend is available at `http://localhost:8000` and the API doc
 | `frontend-builder` | `node:20-alpine` | `npm ci && npm run build` with `VITE_API_BASE_URL=""` |
 | final | `python:3.12-slim` | installs Python deps, copies backend + `frontend/dist/`, starts uvicorn |
 
-Setting `VITE_API_BASE_URL=""` at build time makes the React app call relative paths such as `/portfolio_summary`, so the browser resolves them against the container's own port. That avoids CORS trouble.
+Setting `VITE_API_BASE_URL=""` at build time makes the React app call relative paths such as `/portfolio_summary` and `/api/status`, so the browser resolves them against the container's own port. That avoids CORS trouble.
 
-> **Note:** Inside the container, the `/` root endpoint is renamed to `/api/status` so it does not conflict with the SPA catch-all route that returns `index.html` for unmatched paths.
+> **Note:** `/api/status` is the canonical status endpoint in both development and Docker. The `/` path is reserved for the SPA shell when the compiled frontend is being served.
 
 ### Docker environment variables
 
